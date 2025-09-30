@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voluntree - Streamlined Volunteer Management</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/app.js' %}"></script>
+  <img src="{% static 'images/logo.png' %}" alt="Logo">
+
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'landing' %}" class="logo">Voluntree</a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <div class="auth-buttons">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="btn btn-outline">Profile</a>
+                    <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline">Login</a>
+                    <a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <h1>Streamlined Volunteer Management</h1>
+            <p>Connect volunteers with meaningful opportunities. Our platform simplifies volunteer coordination, tracks impact, and helps organizations build stronger communities.</p>
+
+            <div class="hero-buttons">
+                <a href="{% url 'register' %}" class="btn-hero btn-hero-primary">Get Started</a>
+                <a href="#features" class="btn-hero btn-hero-outline">Learn More</a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">5,000+</span>
+                    <span class="stat-label">Active Volunteers</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">250+</span>
+                    <span class="stat-label">Organizations</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">500K+</span>
+                    <span class="stat-label">Hours Served</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Essential Features for Volunteer Management</h2>
+                <p class="section-subtitle">Everything you need to coordinate volunteers effectively and measure community impact</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3 class="feature-title">Volunteer Database</h3>
+                    <p class="feature-description">Centralized volunteer profiles with skills, availability, and contact information for efficient coordination.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
+                    <h3 class="feature-title">Event Management</h3>
+                    <p class="feature-description">Create, schedule, and manage volunteer events with automated registration and communication tools.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Hour Tracking</h3>
+                    <p class="feature-description">Accurate time tracking and reporting to measure volunteer contributions and organizational impact.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3 class="feature-title">Mobile Access</h3>
+                    <p class="feature-description">Mobile-responsive platform allowing volunteers to sign up and check schedules from any device.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">✉️</div>
+                    <h3 class="feature-title">Communication Tools</h3>
+                    <p class="feature-description">Email notifications, reminders, and messaging system to keep volunteers informed and engaged.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3 class="feature-title">Analytics & Reports</h3>
+                    <p class="feature-description">Generate comprehensive reports on volunteer activity, attendance, and community impact metrics.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>Purpose-Built for Organizations</h2>
+                    <p>Voluntree is designed specifically for nonprofits, schools, religious organizations, and community groups who need a reliable system to manage their volunteer programs.</p>
+                    <p>Our platform focuses on simplicity and effectiveness, removing the complexity while providing the essential tools you need to coordinate volunteers and track your community impact.</p>
+                    <a href="{% url 'register' %}" class="btn-hero btn-hero-primary">Join Us Today</a>
+                </div>
+
+                <div class="about-visual">
+                    <h3>What You Get:</h3>
+                    <ul>
+                        <li>Easy volunteer registration and onboarding</li>
+                        <li>Automated email reminders and notifications</li>
+                        <li>Comprehensive volunteer hour tracking</li>
+                        <li>Custom reporting and analytics</li>
+                        <li>Mobile-friendly volunteer portal</li>
+                        <li>Secure data management and privacy</li>
+                        <li>Dedicated customer support</li>
+                        <li>Integration with existing tools</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta" id="contact">
+        <div class="container">
+            <h2>Ready to Get Started?</h2>
+            <p>Join hundreds of organizations using Voluntree to streamline their volunteer programs and create meaningful community impact.</p>
+            <div class="cta-buttons">
+                <a href="{% url 'register' %}" class="btn-cta-primary">Start Free Trial</a>
+                <a href="#features" class="btn-cta-outline">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Voluntree. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

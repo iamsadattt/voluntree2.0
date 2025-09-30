@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Voluntree{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="{{ user.username }}">
+                {% else %}
+                    <div class="avatar-placeholder">{{ user.username.0|upper }}</div>
+                {% endif %}
+            </div>
+            <div class="profile-info">
+                <h1>{{ user.username }}</h1>
+                <p class="profile-role">Volunteer</p>
+                <p class="profile-email">{{ user.email }}</p>
+            </div>
+            <div class="profile-actions">
+                <a href="#" class="btn btn-primary">Edit Profile</a>
+            </div>
+        </div>
+
+        <div class="profile-stats">
+            <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-content">
+                    <span class="stat-number">{{ profile.hours_completed }}</span>
+                    <span class="stat-label">Hours Completed</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                    <span class="stat-number">{{ profile.events_completed }}</span>
+                    <span class="stat-label">Events Completed</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-content">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">Certificates Earned</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-content">
+            <div class="profile-section">
+                <h2 class="section-title">Personal Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Phone</span>
+                        <span class="info-value">{{ profile.phone|default:"Not provided" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Date of Birth</span>
+                        <span class="info-value">{{ profile.date_of_birth|date:"F d, Y"|default:"Not provided" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">City</span>
+                        <span class="info-value">{{ profile.city|default:"Not provided" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Country</span>
+                        <span class="info-value">{{ profile.country|default:"Not provided" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if profile.bio %}
+            <div class="profile-section">
+                <h2 class="section-title">About Me</h2>
+                <p class="bio-text">{{ profile.bio }}</p>
+            </div>
+            {% endif %}
+
+            {% if profile.skills %}
+            <div class="profile-section">
+                <h2 class="section-title">Skills</h2>
+                <div class="tags-container">
+                    {% for skill in profile.skills.split:"," %}
+                        <span class="tag">{{ skill|trim }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if profile.interests %}
+            <div class="profile-section">
+                <h2 class="section-title">Interests</h2>
+                <div class="tags-container">
+                    {% for interest in profile.interests.split:"," %}
+                        <span class="tag tag-interest">{{ interest|trim }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="profile-section">
+                <h2 class="section-title">Recent Activity</h2>
+                <div class="empty-state">
+                    <p>No recent activity to display</p>
+                    <a href="#" class="btn btn-outline">Browse Events</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

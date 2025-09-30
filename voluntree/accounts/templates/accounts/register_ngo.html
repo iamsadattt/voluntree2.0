@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Organization Registration - Voluntree{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container auth-container-wide">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Organization Registration</h1>
+                <p>Register your organization to start managing volunteers</p>
+            </div>
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <h3 class="form-section-title">Account Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="id_username">Username *</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <span class="error-message">{{ form.username.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_email">Email *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <span class="error-message">{{ form.email.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_password1">Password *</label>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}
+                                <span class="error-message">{{ form.password1.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_password2">Confirm Password *</label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                                <span class="error-message">{{ form.password2.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Organization Details</h3>
+                    
+                    <div class="form-group">
+                        <label for="id_organization_name">Organization Name *</label>
+                        {{ form.organization_name }}
+                        {% if form.organization_name.errors %}
+                            <span class="error-message">{{ form.organization_name.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_registration_number">Registration Number *</label>
+                            {{ form.registration_number }}
+                            {% if form.registration_number.errors %}
+                                <span class="error-message">{{ form.registration_number.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_website">Website</label>
+                            {{ form.website }}
+                            {% if form.website.errors %}
+                                <span class="error-message">{{ form.website.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_description">Description *</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <span class="error-message">{{ form.description.errors.0 }}</span>
+                        {% endif %}
+                        <small class="form-help">Brief description of your organization</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_focus_areas">Focus Areas *</label>
+                        {{ form.focus_areas }}
+                        {% if form.focus_areas.errors %}
+                            <span class="error-message">{{ form.focus_areas.errors.0 }}</span>
+                        {% endif %}
+                        <small class="form-help">Enter areas separated by commas (e.g., Education, Healthcare, Environment)</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Contact Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="id_phone">Phone Number *</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <span class="error-message">{{ form.phone.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_address">Address *</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <span class="error-message">{{ form.address.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_city">City *</label>
+                            {{ form.city }}
+                            {% if form.city.errors %}
+                                <span class="error-message">{{ form.city.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_country">Country *</label>
+                            {{ form.country }}
+                            {% if form.country.errors %}
+                                <span class="error-message">{{ form.country.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="form-notice">
+                    <p><strong>Note:</strong> Your organization account will be pending approval. You'll be able to access your dashboard once approved by our team.</p>
+                </div>
+
+                <button type="submit" class="btn-submit">Register Organization</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+                <p><a href="{% url 'register' %}">← Back to registration options</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

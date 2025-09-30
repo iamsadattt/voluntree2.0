@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign Up - Voluntree{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="register-choice-container">
+        <div class="register-header">
+            <h1>Join Voluntree</h1>
+            <p>Choose your account type to get started</p>
+        </div>
+
+        <div class="choice-cards">
+            <a href="{% url 'register_volunteer' %}" class="choice-card">
+                <div class="choice-icon">👤</div>
+                <h2>Volunteer</h2>
+                <p>Find meaningful volunteer opportunities and track your impact in the community</p>
+                <div class="choice-features">
+                    <span class="feature-tag">✓ Browse Events</span>
+                    <span class="feature-tag">✓ Track Hours</span>
+                    <span class="feature-tag">✓ Earn Certificates</span>
+                </div>
+                <div class="choice-button">Sign Up as Volunteer</div>
+            </a>
+
+            <a href="{% url 'register_ngo' %}" class="choice-card">
+                <div class="choice-icon">🏢</div>
+                <h2>Organization</h2>
+                <p>Manage volunteers, create events, and measure your organization's community impact</p>
+                <div class="choice-features">
+                    <span class="feature-tag">✓ Create Events</span>
+                    <span class="feature-tag">✓ Manage Volunteers</span>
+                    <span class="feature-tag">✓ Generate Reports</span>
+                </div>
+                <div class="choice-button">Sign Up as Organization</div>
+            </a>
+        </div>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
