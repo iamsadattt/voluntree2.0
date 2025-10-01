@@ -5,7 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Voluntree - Volunteer Management{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- Base CSS - Common styles -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    <!-- Page-specific CSS -->
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -54,7 +58,10 @@
         </div>
     </footer>
 
-    <script src="{% static 'js/main.js' %}"></script>
+    <!-- Base JavaScript - Common functionality -->
+    <script src="{% static 'js/base.js' %}"></script>
+
+    <!-- Page-specific JavaScript -->
     {% block extra_js %}{% endblock %}
 </body>
 </html>
