@@ -3,6 +3,10 @@
 
 {% block title %}Organization Registration - Voluntree{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/register_ngo.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="auth-page">
     <div class="auth-container auth-container-wide">
@@ -14,10 +18,10 @@
 
             <form method="post" class="auth-form">
                 {% csrf_token %}
-                
+
                 <div class="form-section">
                     <h3 class="form-section-title">Account Information</h3>
-                    
+
                     <div class="form-group">
                         <label for="id_username">Username *</label>
                         {{ form.username }}
@@ -55,7 +59,7 @@
 
                 <div class="form-section">
                     <h3 class="form-section-title">Organization Details</h3>
-                    
+
                     <div class="form-group">
                         <label for="id_organization_name">Organization Name *</label>
                         {{ form.organization_name }}
@@ -103,7 +107,7 @@
 
                 <div class="form-section">
                     <h3 class="form-section-title">Contact Information</h3>
-                    
+
                     <div class="form-group">
                         <label for="id_phone">Phone Number *</label>
                         {{ form.phone }}
@@ -159,4 +163,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/register_ngo.js' %}"></script>
 {% endblock %}

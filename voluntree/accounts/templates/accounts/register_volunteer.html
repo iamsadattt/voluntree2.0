@@ -3,6 +3,10 @@
 
 {% block title %}Volunteer Registration - Voluntree{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/register_volunteer.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="auth-page">
     <div class="auth-container">
@@ -14,7 +18,7 @@
 
             <form method="post" class="auth-form">
                 {% csrf_token %}
-                
+
                 <div class="form-group">
                     <label for="id_username">Username *</label>
                     {{ form.username }}
@@ -82,4 +86,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/register_volunteer.js' %}"></script>
 {% endblock %}
