@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Organization Profile - Voluntree{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/edit_profile_ngo.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="edit-profile-page">
+    <div class="edit-profile-container edit-profile-container-wide">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <a href="{% url 'profile' %}" class="back-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    Back to Profile
+                </a>
+                <h1>Edit Organization Profile</h1>
+                <p>Update your organization information</p>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <form method="post" enctype="multipart/form-data" class="edit-form" id="editProfileForm">
+            {% csrf_token %}
+
+            <!-- Logo Section -->
+            <div class="form-card">
+                <h2 class="form-section-title">Organization Logo</h2>
+                <div class="profile-picture-upload">
+                    <div class="current-picture">
+                        {% if profile.logo %}
+                            <img src="{{ profile.logo.url }}" alt="Organization Logo" id="previewImage" class="preview-image">
+                        {% else %}
+                            <div class="preview-placeholder" id="previewPlaceholder">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="upload-actions">
+                        <label for="id_logo" class="btn-upload">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            Choose Logo
+                        </label>
+                        <input type="file" id="id_logo" name="logo" accept="image/*" style="display: none;">
+                        <small class="upload-hint">JPG, PNG or SVG. Max 5MB</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organization Information Section -->
+            <div class="form-card">
+                <h2 class="form-section-title">Organization Information</h2>
+                
+                <div class="form-group">
+                    <label for="id_organization_name">Organization Name *</label>
+                    <input type="text" id="id_organization_name" name="organization_name" value="{{ profile.organization_name }}" required class="form-input">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_registration_number">Registration Number *</label>
+                        <input type="text" id="id_registration_number" name="registration_number" value="{{ profile.registration_number }}" required class="form-input" readonly>
+                        <small class="form-help">Contact support to change registration number</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_website">Website</label>
+                        <input type="url" id="id_website" name="website" value="{{ profile.website }}" class="form-input" placeholder="https://example.org">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_description">Organization Description *</label>
+                    <textarea id="id_description" name="description" rows="5" required class="form-textarea" placeholder="Describe your organization's mission and activities...">{{ profile.description }}</textarea>
+                    <small class="form-help">Provide a comprehensive description of your organization</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_focus_areas">Focus Areas *</label>
+                    <input type="text" id="id_focus_areas" name="focus_areas" value="{{ profile.focus_areas }}" required class="form-input" placeholder="e.g., Education, Healthcare, Environment">
+                    <small class="form-help">Separate multiple areas with commas</small>
+                </div>
+            </div>
+
+            <!-- Contact Information Section -->
+            <div class="form-card">
+                <h2 class="form-section-title">Contact Information</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_email">Email Address *</label>
+                        <input type="email" id="id_email" name="email" value="{{ profile.email }}" required class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_phone">Phone Number *</label>
+                        <input type="tel" id="id_phone" name="phone" value="{{ profile.phone }}" required class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Section -->
+            <div class="form-card">
+                <h2 class="form-section-title">Location</h2>
+                
+                <div class="form-group">
+                    <label for="id_address">Address *</label>
+                    <textarea id="id_address" name="address" rows="2" required class="form-textarea" placeholder="Street address">{{ profile.address }}</textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_city">City *</label>
+                        <input type="text" id="id_city" name="city" value="{{ profile.city }}" required class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_country">Country *</label>
+                        <input type="text" id="id_country" name="country" value="{{ profile.country }}" required class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verification Documents Section -->
+            <div class="form-card">
+                <h2 class="form-section-title">Verification Documents</h2>
+                
+                <div class="form-group">
+                    <label for="id_verification_document">Verification Document</label>
+                    {% if profile.verification_document %}
+                        <div class="current-document">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                <polyline points="13 2 13 9 20 9"></polyline>
+                            </svg>
+                            <a href="{{ profile.verification_document.url }}" target="_blank">View current document</a>
+                        </div>
+                    {% endif %}
+                    <input type="file" id="id_verification_document" name="verification_document" accept=".pdf,.doc,.docx" class="form-input-file">
+                    <small class="form-help">Upload registration certificate or other verification documents (PDF, DOC, DOCX)</small>
+                </div>
+
+                {% if profile.status == 'pending' %}
+                <div class="status-notice notice-pending">
+                    <div class="notice-icon">⏳</div>
+                    <div class="notice-content">
+                        <h3>Verification Pending</h3>
+                        <p>Your organization profile is under review. Updating information may require re-verification.</p>
+                    </div>
+                </div>
+                {% elif profile.status == 'approved' %}
+                <div class="status-notice notice-approved">
+                    <div class="notice-icon">✅</div>
+                    <div class="notice-content">
+                        <h3>Verified Organization</h3>
+                        <p>Your organization is verified. Major changes may require re-verification.</p>
+                    </div>
+                </div>
+                {% elif profile.status == 'rejected' %}
+                <div class="status-notice notice-rejected">
+                    <div class="notice-icon">❌</div>
+                    <div class="notice-content">
+                        <h3>Verification Required</h3>
+                        <p>Please update your information and documents for verification. Contact support for assistance.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Form Errors -->
+            {% if form.errors %}
+            <div class="form-errors">
+                <h3>Please correct the following errors:</h3>
+                <ul>
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li>{{ field|title }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{% url 'profile' %}" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-save">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/edit_profile_ngo.js' %}"></script>
+{% endblock %}

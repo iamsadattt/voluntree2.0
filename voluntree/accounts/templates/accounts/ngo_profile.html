@@ -3,5 +3,229 @@
 
 {% block title %}{{ profile.organization_name }} - Voluntree{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/ngo_profile.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="profile-page">
+    <div class="profile-container">
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-banner"></div>
+            <div class="profile-header-content">
+                <div class="profile-picture-container">
+                    {% if profile.logo %}
+                        <img src="{{ profile.logo.url }}" alt="{{ profile.organization_name }}" class="profile-picture">
+                    {% else %}
+                        <div class="profile-picture-placeholder">
+                            <span>{{ profile.organization_name|first|upper }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="profile-header-info">
+                    <div class="org-name-row">
+                        <h1 class="profile-name">{{ profile.organization_name }}</h1>
+                        {% if profile.status == 'approved' %}
+                            <span class="status-badge status-approved">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                Verified
+                            </span>
+                        {% elif profile.status == 'pending' %}
+                            <span class="status-badge status-pending">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                Pending Approval
+                            </span>
+                        {% elif profile.status == 'rejected' %}
+                            <span class="status-badge status-rejected">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                                </svg>
+                                Not Verified
+                            </span>
+                        {% endif %}
+                    </div>
+                    <p class="profile-username">Organization</p>
+                    <div class="profile-meta">
+                        <span class="meta-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                            NGO
+                        </span>
+                        {% if profile.city %}
+                        <span class="meta-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            {{ profile.city }}, {{ profile.country }}
+                        </span>
+                        {% endif %}
+                        <span class="meta-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            Member since {{ profile.created_at|date:"F Y" }}
+                        </span>
+                    </div>
+                </div>
+
+                {% if profile.user == request.user %}
+                <div class="profile-actions">
+                    <a href="{% url 'edit_profile_ngo' %}" class="btn-edit-profile">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Edit Profile
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="profile-content">
+
+            <!-- Main Content Grid -->
+            <div class="content-grid">
+
+                <!-- Left Column -->
+                <div class="content-main">
+
+                    <!-- About Section -->
+                    <div class="info-card">
+                        <h2 class="card-title">About Organization</h2>
+                        <p class="description-text">{{ profile.description }}</p>
+                    </div>
+
+                    <!-- Focus Areas Section -->
+                    {% if focus_areas_list %}
+<div class="info-card">
+    <h2 class="card-title">Focus Areas</h2>
+    <div class="tags-container">
+        {% for area in focus_areas_list %}
+            <span class="tag tag-focus">{{ area }}</span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+                    <!-- Registration Details -->
+                    <div class="info-card">
+                        <h2 class="card-title">Registration Details</h2>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Registration Number</span>
+                                <span class="detail-value">{{ profile.registration_number }}</span>
+                            </div>
+                            {% if profile.website %}
+                            <div class="detail-item">
+                                <span class="detail-label">Website</span>
+                                <a href="{{ profile.website }}" target="_blank" rel="noopener" class="detail-value detail-link">
+                                    {{ profile.website }}
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                    </svg>
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if profile.approved_at %}
+                            <div class="detail-item">
+                                <span class="detail-label">Approved On</span>
+                                <span class="detail-value">{{ profile.approved_at|date:"F d, Y" }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column - Sidebar -->
+                <div class="content-sidebar">
+
+                    <!-- Contact Information -->
+                    <div class="info-card">
+                        <h2 class="card-title">Contact Information</h2>
+                        <div class="contact-list">
+                            <div class="contact-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                                <span>{{ profile.email }}</span>
+                            </div>
+                            <div class="contact-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                </svg>
+                                <span>{{ profile.phone }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Address Information -->
+                    <div class="info-card">
+                        <h2 class="card-title">Location</h2>
+                        <div class="location-info">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <div>
+                                <p>{{ profile.address }}</p>
+                                <p>{{ profile.city }}, {{ profile.country }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if profile.status == 'pending' and profile.user == request.user %}
+                    <!-- Pending Notice -->
+                    <div class="info-card status-notice notice-pending">
+                        <div class="notice-icon">⏳</div>
+                        <div class="notice-content">
+                            <h3>Pending Approval</h3>
+                            <p>Your organization profile is under review. You'll be notified once it's approved.</p>
+                        </div>
+                    </div>
+                    {% elif profile.status == 'rejected' and profile.user == request.user %}
+                    <!-- Rejected Notice -->
+                    <div class="info-card status-notice notice-rejected">
+                        <div class="notice-icon">❌</div>
+                        <div class="notice-content">
+                            <h3>Verification Failed</h3>
+                            <p>Your organization profile needs additional information. Please contact support.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/ngo_profile.js' %}"></script>
+{% endblock %}

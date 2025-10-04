@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Voluntree{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/edit_profile_volunteer.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="edit-profile-page">
+    <div class="edit-profile-container">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <a href="{% url 'profile' %}" class="back-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    Back to Profile
+                </a>
+                <h1>Edit Profile</h1>
+                <p>Update your volunteer information</p>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <form method="post" enctype="multipart/form-data" class="edit-form" id="editProfileForm">
+            {% csrf_token %}
+
+            <!-- Profile Picture Section -->
+            <div class="form-card">
+                <h2 class="form-section-title">Profile Picture</h2>
+                <div class="profile-picture-upload">
+                    <div class="current-picture">
+                        {% if profile.profile_picture %}
+                            <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" id="previewImage" class="preview-image">
+                        {% else %}
+                            <div class="preview-placeholder" id="previewPlaceholder">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="upload-actions">
+                        <label for="id_profile_picture" class="btn-upload">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            Choose Photo
+                        </label>
+                        <input type="file" id="id_profile_picture" name="profile_picture" accept="image/*" style="display: none;">
+                        <small class="upload-hint">JPG, PNG or GIF. Max 5MB</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Information Section -->
+            <div class="form-card">
+                <h2 class="form-section-title">Personal Information</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_first_name">First Name</label>
+                        <input type="text" id="id_first_name" name="first_name" value="{{ user.first_name }}" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_last_name">Last Name</label>
+                        <input type="text" id="id_last_name" name="last_name" value="{{ user.last_name }}" class="form-input">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_email">Email Address *</label>
+                    <input type="email" id="id_email" name="email" value="{{ user.email }}" required class="form-input">
+                    <small class="form-help">Your primary contact email</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_phone">Phone Number</label>
+                        <input type="tel" id="id_phone" name="phone" value="{{ profile.phone }}" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_date_of_birth">Date of Birth</label>
+                        <input type="date" id="id_date_of_birth" name="date_of_birth" value="{{ profile.date_of_birth|date:'Y-m-d' }}" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="form-card">
+                <h2 class="form-section-title">About</h2>
+                
+                <div class="form-group">
+                    <label for="id_bio">Bio</label>
+                    <textarea id="id_bio" name="bio" rows="4" class="form-textarea" placeholder="Tell us about yourself...">{{ profile.bio }}</textarea>
+                    <small class="form-help">Brief description about you and your volunteer interests</small>
+                </div>
+            </div>
+
+            <!-- Skills & Interests Section -->
+            <div class="form-card">
+                <h2 class="form-section-title">Skills & Interests</h2>
+                
+                <div class="form-group">
+                    <label for="id_skills">Skills</label>
+                    <input type="text" id="id_skills" name="skills" value="{{ profile.skills }}" class="form-input" placeholder="e.g., Teaching, First Aid, Public Speaking">
+                    <small class="form-help">Separate multiple skills with commas</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_interests">Interests</label>
+                    <input type="text" id="id_interests" name="interests" value="{{ profile.interests }}" class="form-input" placeholder="e.g., Education, Environment, Healthcare">
+                    <small class="form-help">Separate multiple interests with commas</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_availability">Availability</label>
+                    <input type="text" id="id_availability" name="availability" value="{{ profile.availability }}" class="form-input" placeholder="e.g., Weekends, Evenings">
+                    <small class="form-help">When are you typically available to volunteer?</small>
+                </div>
+            </div>
+
+            <!-- Location Section -->
+            <div class="form-card">
+                <h2 class="form-section-title">Location</h2>
+                
+                <div class="form-group">
+                    <label for="id_address">Address</label>
+                    <textarea id="id_address" name="address" rows="2" class="form-textarea" placeholder="Street address">{{ profile.address }}</textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_city">City</label>
+                        <input type="text" id="id_city" name="city" value="{{ profile.city }}" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_country">Country</label>
+                        <input type="text" id="id_country" name="country" value="{{ profile.country }}" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Errors -->
+            {% if form.errors %}
+            <div class="form-errors">
+                <h3>Please correct the following errors:</h3>
+                <ul>
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li>{{ field|title }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{% url 'profile' %}" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-save">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/edit_profile_volunteer.js' %}"></script>
+{% endblock %}
