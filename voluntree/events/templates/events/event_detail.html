@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ event.title }} - Voluntree{% endblock %}
+
+{% block content %}
+<div class="event-detail-page">
+    <div class="event-container">
+        
+        <!-- Back Button -->
+        <a href="{% url 'event_list' %}" class="back-button">← Back to Events</a>
+
+        <div class="event-detail-card">
+            
+            <!-- Event Banner -->
+            {% if event.image %}
+                <img src="{{ event.image.url }}" alt="{{ event.title }}" class="event-banner">
+            {% else %}
+                <div class="event-banner-placeholder">📅</div>
+            {% endif %}
+
+            <div class="event-content-wrapper">
+                
+                <!-- Event Header -->
+                <div class="event-header">
+                    <div class="event-title-row">
+                        <h1 class="event-title">{{ event.title }}</h1>
+                        <span class="event-status-badge status-{{ event.status }}">
+                            {{ event.get_status_display }}
+                        </span>
+                    </div>
+
+                    <div class="event-ngo-info">
+                        {% if event.ngo.logo %}
+                            <img src="{{ event.ngo.logo.url }}" alt="{{ event.ngo.organization_name }}" class="ngo-logo">
+                        {% else %}
+                            <div class="ngo-logo-placeholder">
+                                {{ event.ngo.organization_name|first|upper }}
+                            </div>
+                        {% endif %}
+                        <div class="ngo-details">
+                            <h3>{{ event.ngo.organization_name }}</h3>
+                            <p>Organized by</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Meta Information -->
+                <div class="event-meta-grid">
+                    <div class="meta-card">
+                        <div class="meta-icon">📅</div>
+                        <div class="meta-info">
+                            <h4>Date & Time</h4>
+                            <p>{{ event.date|date:"M d, Y - g:i A" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="meta-card">
+                        <div class="meta-icon">📍</div>
+                        <div class="meta-info">
+                            <h4>Location</h4>
+                            <p>{{ event.location }}</p>
+                        </div>
+                    </div>
+
+                    <div class="meta-card">
+                        <div class="meta-icon">👥</div>
+                        <div class="meta-info">
+                            <h4>Volunteers Needed</h4>
+                            <p>{{ event.get_registered_count }} / {{ event.max_volunteers }}</p>
+                        </div>
+                    </div>
+
+                    <div class="meta-card">
+                        <div class="meta-icon">⏰</div>
+                        <div class="meta-info">
+                            <h4>Spots Available</h4>
+                            <p>{{ event.get_available_spots }} left</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Description -->
+                <div>
+                    <h2 class="section-title">About This Event</h2>
+                    <p class="event-description">{{ event.description }}</p>
+                </div>
+
+                <!-- Required Skills -->
+                {% if skills_list %}
+                <div>
+                    <h2 class="section-title">Required Skills</h2>
+                    <div class="skills-container">
+                        {% for skill in skills_list %}
+                            <span class="skill-tag">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Registered Volunteers -->
+                {% if approved_volunteers %}
+                <div class="volunteers-section">
+                    <h2 class="section-title">Registered Volunteers ({{ approved_volunteers.count }})</h2>
+                    <div class="volunteers-grid">
+                        {% for registration in approved_volunteers %}
+                            <div class="volunteer-card">
+                                <div class="volunteer-avatar">
+                                    {{ registration.volunteer.username|first|upper }}
+                                </div>
+                                <div class="volunteer-info">
+                                    <p>{{ registration.volunteer.username }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Action Section -->
+                <div class="action-section">
+                    
+                    {% if user.is_authenticated %}
+                        
+                        {% if user.user_type == 'volunteer' %}
+                            
+                            {% if user_registration %}
+                                <!-- User has already registered -->
+                                {% if user_registration.status == 'pending' %}
+                                    <div class="status-message status-pending">
+                                        ⏳ Your application is pending approval
+                                    </div>
+                                {% elif user_registration.status == 'approved' %}
+                                    <div class="status-message status-approved">
+                                        ✓ You're registered for this event!
+                                    </div>
+                                    <div class="action-buttons">
+                                        <form method="post" action="{% url 'event_withdraw' user_registration.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-withdraw" onclick="return confirm('Are you sure you want to withdraw from this event?')">
+                                                Withdraw
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% elif user_registration.status == 'rejected' %}
+                                    <div class="status-message status-rejected">
+                                        ✗ Your application was not approved
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <!-- User has not registered yet -->
+                                {% if event.is_full %}
+                                    <div class="status-message status-full">
+                                        ✗ This event is at full capacity
+                                    </div>
+                                {% elif event.is_past %}
+                                    <div class="status-message info-message">
+                                        ℹ️ This event has already passed
+                                    </div>
+                                {% else %}
+                                    <form method="post" action="{% url 'event_register' event.pk %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-register">
+                                            Register for Event
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+
+                        {% elif user.user_type == 'ngo' %}
+                            
+                            {% if event.ngo.user == user %}
+                                <!-- NGO owns this event -->
+                                <div class="action-buttons">
+                                    <a href="{% url 'event_edit' event.pk %}" class="btn-edit">Edit Event</a>
+                                    <a href="{% url 'manage_registrations' event.pk %}" class="btn-manage">
+                                        Manage Registrations ({{ event.get_pending_count }})
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div class="status-message info-message">
+                                    ℹ️ Only volunteers can register for events
+                                </div>
+                            {% endif %}
+
+                        {% endif %}
+
+                    {% else %}
+                        <!-- User not logged in -->
+                        <div class="status-message info-message">
+                            ℹ️ Please log in to register for this event
+                        </div>
+                        <div class="action-buttons">
+                            <a href="{% url 'login' %}" class="btn-register">Login</a>
+                            <a href="{% url 'register' %}" class="btn-edit">Sign Up</a>
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

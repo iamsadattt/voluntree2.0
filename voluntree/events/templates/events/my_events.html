@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Events - Voluntree{% endblock %}
+
+{% block content %}
+<div class="my-events-page">
+    <div class="events-container">
+        
+        <div class="page-header">
+            <h1>My Registered Events</h1>
+            <p>View and manage your event registrations</p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'event_list' %}" class="btn-browse">Browse More Events</a>
+        </div>
+
+        {% if registrations %}
+            <div class="events-grid">
+                {% for registration in registrations %}
+                    <div class="event-card">
+                        {% if registration.event.image %}
+                            <img src="{{ registration.event.image.url }}" alt="{{ registration.event.title }}" class="event-image">
+                        {% else %}
+                            <div class="event-image-placeholder">📅</div>
+                        {% endif %}
+                        
+                        <div class="event-content">
+                            <div class="registration-status status-{{ registration.status }}">
+                                {{ registration.get_status_display }}
+                            </div>
+
+                            <h3 class="event-title">{{ registration.event.title }}</h3>
+                            <p class="event-ngo">{{ registration.event.ngo.organization_name }}</p>
+
+                            <div class="event-meta">
+                                <div class="meta-item">
+                                    <span>📅 {{ registration.event.date|date:"M d, Y - g:i A" }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span>📍 {{ registration.event.location }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span>Applied: {{ registration.applied_at|date:"M d, Y" }}</span>
+                                </div>
+                            </div>
+
+                            <div class="event-actions">
+                                <a href="{% url 'event_detail' registration.event.pk %}" class="btn-view">View Event</a>
+                                {% if registration.status == 'approved' %}
+                                    <form method="post" action="{% url 'event_withdraw' registration.pk %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-withdraw" onclick="return confirm('Are you sure you want to withdraw?')">Withdraw</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-events">
+                <div class="no-events-icon">📋</div>
+                <h3>No Registered Events</h3>
+                <p>You haven't registered for any events yet. Browse available events to get started!</p>
+                <a href="{% url 'event_list' %}" class="btn-browse-large">Browse Events</a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

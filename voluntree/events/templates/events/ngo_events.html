@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Events - Voluntree{% endblock %}
+
+{% block content %}
+<div class="ngo-events-page">
+    <div class="events-container">
+        
+        <div class="page-header">
+            <h1>My Organization's Events</h1>
+            <p>Manage your events and volunteer applications</p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'event_create' %}" class="btn-create">+ Create New Event</a>
+        </div>
+
+        {% if events %}
+            <div class="events-grid">
+                {% for event in events %}
+                    <div class="event-card">
+                        {% if event.image %}
+                            <img src="{{ event.image.url }}" alt="{{ event.title }}" class="event-image">
+                        {% else %}
+                            <div class="event-image-placeholder">📅</div>
+                        {% endif %}
+                        
+                        <div class="event-content">
+                            <div class="event-status-row">
+                                <span class="event-status status-{{ event.status }}">{{ event.get_status_display }}</span>
+                                <span class="pending-badge">{{ event.get_pending_count }} pending</span>
+                            </div>
+
+                            <h3 class="event-title">{{ event.title }}</h3>
+
+                            <div class="event-meta">
+                                <div class="meta-item">
+                                    <span>📅 {{ event.date|date:"M d, Y - g:i A" }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span>📍 {{ event.location }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span>👥 {{ event.get_registered_count }} / {{ event.max_volunteers }} volunteers</span>
+                                </div>
+                            </div>
+
+                            <div class="event-actions">
+                                <a href="{% url 'event_detail' event.pk %}" class="btn-view">View</a>
+                                <a href="{% url 'event_edit' event.pk %}" class="btn-edit">Edit</a>
+                                <a href="{% url 'manage_registrations' event.pk %}" class="btn-manage">Manage ({{ event.get_pending_count }})</a>
+                                <form method="post" action="{% url 'event_delete' event.pk %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this event?')">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-events">
+                <div class="no-events-icon">📋</div>
+                <h3>No Events Created</h3>
+                <p>You haven't created any events yet. Start creating opportunities for volunteers!</p>
+                <a href="{% url 'event_create' %}" class="btn-create-large">Create Your First Event</a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

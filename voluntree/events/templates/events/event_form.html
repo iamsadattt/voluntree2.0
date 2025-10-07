@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} Event - Voluntree{% endblock %}
+
+{% block content %}
+<div class="event-form-page">
+    <div class="form-container">
+        
+        <a href="{% url 'ngo_events' %}" class="back-button">← Back to My Events</a>
+
+        <div class="form-card">
+            <div class="form-header">
+                <h1>{{ action }} Event</h1>
+                <p>{% if action == 'Create' %}Create a new volunteering opportunity{% else %}Update event details{% endif %}</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}">Event Title <span class="required">*</span></label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.title.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">Event Description <span class="required">*</span></label>
+                    {{ form.description }}
+                    <span class="help-text">Provide detailed information about the event</span>
+                    {% if form.description.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.description.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.image.id_for_label }}">Event Image/Poster</label>
+                    {{ form.image }}
+                    <span class="help-text">Upload an event poster or cover image</span>
+                    {% if event and event.image %}
+                        <div class="current-image">
+                            <p>Current image:</p>
+                            <img src="{{ event.image.url }}" alt="Current event image">
+                        </div>
+                    {% endif %}
+                    {% if form.image.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.image.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.date.id_for_label }}">Event Date & Time <span class="required">*</span></label>
+                        {{ form.date }}
+                        {% if form.date.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.date.errors %}<li>{{ error }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.location.id_for_label }}">Location <span class="required">*</span></label>
+                        {{ form.location }}
+                        {% if form.location.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.location.errors %}<li>{{ error }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.required_skills.id_for_label }}">Required Skills</label>
+                    {{ form.required_skills }}
+                    <span class="help-text">{{ form.required_skills.help_text }}</span>
+                    {% if form.required_skills.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.required_skills.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.max_volunteers.id_for_label }}">Maximum Volunteers <span class="required">*</span></label>
+                        {{ form.max_volunteers }}
+                        {% if form.max_volunteers.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.max_volunteers.errors %}<li>{{ error }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.status.id_for_label }}">Event Status <span class="required">*</span></label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.status.errors %}<li>{{ error }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'ngo_events' %}" class="btn-cancel">Cancel</a>
+                    <button type="submit" class="btn-submit">{{ action }} Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

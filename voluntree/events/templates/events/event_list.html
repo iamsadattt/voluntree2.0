@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Browse Events - Voluntree{% endblock %}
+
+{% block content %}
+<div class="events-page">
+    <div class="events-container">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Discover Volunteer Opportunities</h1>
+            <p>Find and join events that match your passion and skills</p>
+        </div>
+
+        <!-- Search and Filter -->
+        <form method="get" class="search-filter-bar">
+            <div class="search-box">
+                <input type="text" 
+                       name="search" 
+                       placeholder="Search events by title, description, or location..." 
+                       value="{{ search_query }}">
+                <button type="submit">Search</button>
+            </div>
+            <select name="status" class="filter-select" onchange="this.form.submit()">
+                <option value="">All Status</option>
+                <option value="published" {% if status_filter == 'published' %}selected{% endif %}>Published</option>
+                <option value="ongoing" {% if status_filter == 'ongoing' %}selected{% endif %}>Ongoing</option>
+                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+            </select>
+        </form>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <div>
+                {% if user.is_authenticated %}
+                    {% if user.user_type == 'volunteer' %}
+                        <a href="{% url 'my_events' %}" class="btn-my-events">My Events</a>
+                    {% elif user.user_type == 'ngo' %}
+                        <a href="{% url 'ngo_events' %}" class="btn-my-events">My Events</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% if user.is_authenticated and user.user_type == 'ngo' %}
+                <a href="{% url 'event_create' %}" class="btn-create-event">+ Create Event</a>
+            {% endif %}
+        </div>
+
+        <!-- Events Grid -->
+        {% if events %}
+            <div class="events-grid">
+                {% for event in events %}
+                    <div class="event-card">
+                        {% if event.image %}
+                            <img src="{{ event.image.url }}" alt="{{ event.title }}" class="event-image">
+                        {% else %}
+                            <div class="event-image-placeholder">📅</div>
+                        {% endif %}
+                        
+                        <div class="event-content">
+                            <div class="event-header">
+                                <h3 class="event-title">{{ event.title }}</h3>
+                                <p class="event-ngo">{{ event.ngo.organization_name }}</p>
+                            </div>
+
+                            <p class="event-description">{{ event.description|truncatewords:20 }}</p>
+
+                            <div class="event-meta">
+                                <div class="meta-item">
+                                    <span>📅 {{ event.date|date:"M d, Y - g:i A" }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span>📍 {{ event.location }}</span>
+                                </div>
+                            </div>
+
+                            <div class="event-footer">
+                                <span class="event-status status-{{ event.status }}">
+                                    {{ event.get_status_display }}
+                                </span>
+                                <span class="event-spots">
+                                    {{ event.get_available_spots }} spots left
+                                </span>
+                            </div>
+
+                            <a href="{% url 'event_detail' event.pk %}" class="btn-view-event">View Details</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-results">
+                <h3>No Events Found</h3>
+                <p>{% if search_query %}Try adjusting your search terms{% else %}No events available at the moment{% endif %}</p>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

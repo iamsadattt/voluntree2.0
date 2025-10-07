@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Registrations - {{ event.title }} - Voluntree{% endblock %}
+
+{% block content %}
+<div class="manage-registrations-page">
+    <div class="container">
+        
+        <a href="{% url 'ngo_events' %}" class="back-button">← Back to My Events</a>
+
+        <div class="page-header">
+            <h1>Manage Registrations</h1>
+            <h2>{{ event.title }}</h2>
+            <p>Review and approve volunteer applications</p>
+        </div>
+
+        <div class="event-summary">
+            <div class="summary-item">
+                <span class="label">Total Volunteers:</span>
+                <span class="value">{{ event.get_registered_count }} / {{ event.max_volunteers }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Pending Applications:</span>
+                <span class="value">{{ event.get_pending_count }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Available Spots:</span>
+                <span class="value">{{ event.get_available_spots }}</span>
+            </div>
+        </div>
+
+        {% if registrations %}
+            <div class="registrations-list">
+                {% for registration in registrations %}
+                    <div class="registration-card status-{{ registration.status }}">
+                        <div class="volunteer-info">
+                            <div class="volunteer-avatar">
+                                {{ registration.volunteer.username|first|upper }}
+                            </div>
+                            <div class="volunteer-details">
+                                <h3>{{ registration.volunteer.get_full_name|default:registration.volunteer.username }}</h3>
+                                <p>@{{ registration.volunteer.username }}</p>
+                                <p class="email">{{ registration.volunteer.email }}</p>
+                                {% if registration.volunteer.volunteer_profile.phone %}
+                                    <p class="phone">📞 {{ registration.volunteer.volunteer_profile.phone }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="registration-meta">
+                            <div class="meta-row">
+                                <span class="label">Applied:</span>
+                                <span>{{ registration.applied_at|date:"M d, Y - g:i A" }}</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="label">Status:</span>
+                                <span class="status-badge status-{{ registration.status }}">
+                                    {{ registration.get_status_display }}
+                                </span>
+                            </div>
+                            {% if registration.volunteer.volunteer_profile.skills %}
+                                <div class="meta-row">
+                                    <span class="label">Skills:</span>
+                                    <span>{{ registration.volunteer.volunteer_profile.skills }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="registration-actions">
+                            <a href="{% url 'profile' %}?user={{ registration.volunteer.username }}" class="btn-view-profile">View Profile</a>
+                            
+                            {% if registration.status == 'pending' %}
+                                <form method="post" action="{% url 'approve_registration' registration.pk %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-approve">✓ Approve</button>
+                                </form>
+                                <form method="post" action="{% url 'reject_registration' registration.pk %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-reject" onclick="return confirm('Are you sure you want to reject this application?')">✗ Reject</button>
+                                </form>
+                            {% elif registration.status == 'approved' %}
+                                <span class="approved-label">✓ Approved</span>
+                            {% elif registration.status == 'rejected' %}
+                                <span class="rejected-label">✗ Rejected</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-registrations">
+                <div class="no-registrations-icon">👥</div>
+                <h3>No Applications Yet</h3>
+                <p>No volunteers have applied for this event yet.</p>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
