@@ -53,7 +53,12 @@ def user_login(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Welcome back, {username}!')
-                return redirect('landing')
+
+                # Redirect based on user type
+                if user.user_type == 'admin':
+                    return redirect('admin_dashboard')
+                else:
+                    return redirect('landing')
         else:
             messages.error(request, 'Invalid username or password.')
     else:
@@ -77,7 +82,8 @@ def profile_view(request):
         context = {
             'profile': profile,
             'skills_list': [s.strip() for s in profile.skills.split(',') if s.strip()] if profile.skills else [],
-            'interests_list': [i.strip() for i in profile.interests.split(',') if i.strip()] if profile.interests else [],
+            'interests_list': [i.strip() for i in profile.interests.split(',') if
+                               i.strip()] if profile.interests else [],
         }
         return render(request, 'accounts/volunteer_profile.html', context)
     elif user.user_type == 'ngo':
@@ -85,11 +91,13 @@ def profile_view(request):
         # Split comma-separated fields
         context = {
             'profile': profile,
-            'focus_areas_list': [a.strip() for a in profile.focus_areas.split(',') if a.strip()] if profile.focus_areas else [],
+            'focus_areas_list': [a.strip() for a in profile.focus_areas.split(',') if
+                                 a.strip()] if profile.focus_areas else [],
         }
         return render(request, 'accounts/ngo_profile.html', context)
     else:
-        return redirect('landing')
+        # Admin users redirect to admin dashboard
+        return redirect('admin_dashboard')
 
 
 @login_required

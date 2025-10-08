@@ -1,0 +1,165 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Dashboard - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <p>Welcome back, {{ user.username }}! Here's your platform overview.</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon volunteers-icon">👥</div>
+        <div class="stat-content">
+            <h3>Total Volunteers</h3>
+            <p class="stat-number">{{ total_volunteers }}</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon ngos-icon">🏢</div>
+        <div class="stat-content">
+            <h3>Total NGOs</h3>
+            <p class="stat-number">{{ total_ngos }}</p>
+            <p class="stat-detail">{{ approved_ngos }} Approved | {{ pending_ngos }} Pending</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon events-icon">📅</div>
+        <div class="stat-content">
+            <h3>Total Events</h3>
+            <p class="stat-number">{{ total_events }}</p>
+            <p class="stat-detail">{{ upcoming_events }} Upcoming</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon hours-icon">⏱️</div>
+        <div class="stat-content">
+            <h3>Volunteer Hours</h3>
+            <p class="stat-number">{{ total_hours }}</p>
+            <p class="stat-detail">Completed this month</p>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions & Alerts -->
+<div class="dashboard-row">
+    <!-- Pending NGO Approvals Alert -->
+    {% if pending_ngos > 0 %}
+    <div class="alert-box alert-warning">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+            <h3>Pending NGO Approvals</h3>
+            <p>{{ pending_ngos }} NGO(s) are waiting for approval.</p>
+            <a href="{% url 'admin_ngo_approvals' %}" class="btn-action">Review Now</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Recent Activity Section -->
+<div class="dashboard-row">
+    <!-- Recent Volunteers -->
+    <div class="activity-section">
+        <div class="section-header">
+            <h2>Recent Volunteers</h2>
+            <a href="{% url 'admin_users' %}" class="view-all-link">View All →</a>
+        </div>
+        <div class="activity-list">
+            {% if recent_volunteers %}
+                {% for volunteer in recent_volunteers %}
+                <div class="activity-item">
+                    <div class="activity-avatar">
+                        {% if volunteer.volunteer_profile.profile_picture %}
+                            <img src="{{ volunteer.volunteer_profile.profile_picture.url }}" alt="{{ volunteer.username }}">
+                        {% else %}
+                            <div class="avatar-placeholder">{{ volunteer.first_name|first|upper }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="activity-details">
+                        <h4>{{ volunteer.get_full_name|default:volunteer.username }}</h4>
+                        <p>Joined {{ volunteer.date_joined|timesince }} ago</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-data">No recent volunteers</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent NGOs -->
+    <div class="activity-section">
+        <div class="section-header">
+            <h2>Recent NGO Registrations</h2>
+            <a href="{% url 'admin_ngos' %}" class="view-all-link">View All →</a>
+        </div>
+        <div class="activity-list">
+            {% if recent_ngos %}
+                {% for ngo in recent_ngos %}
+                <div class="activity-item">
+                    <div class="activity-avatar">
+                        {% if ngo.logo %}
+                            <img src="{{ ngo.logo.url }}" alt="{{ ngo.organization_name }}">
+                        {% else %}
+                            <div class="avatar-placeholder">{{ ngo.organization_name|first|upper }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="activity-details">
+                        <h4>{{ ngo.organization_name }}</h4>
+                        <p>Registered {{ ngo.created_at|timesince }} ago</p>
+                        <span class="status-badge status-{{ ngo.status }}">{{ ngo.get_status_display }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-data">No recent NGO registrations</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Events -->
+<div class="dashboard-section">
+    <div class="section-header">
+        <h2>Upcoming Events</h2>
+        <a href="{% url 'admin_events' %}" class="view-all-link">View All →</a>
+    </div>
+    <div class="events-table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Event Title</th>
+                    <th>NGO</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Volunteers</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if upcoming_events_list %}
+                    {% for event in upcoming_events_list %}
+                    <tr>
+                        <td>{{ event.title }}</td>
+                        <td>{{ event.ngo.organization_name }}</td>
+                        <td>{{ event.date|date:"M d, Y" }}</td>
+                        <td>{{ event.location|truncatewords:5 }}</td>
+                        <td>{{ event.get_registered_count }} / {{ event.max_volunteers }}</td>
+                        <td><span class="status-badge status-{{ event.status }}">{{ event.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="no-data">No upcoming events</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,246 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Platform Settings - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Platform Settings</h1>
+    <p>Configure your Voluntree platform</p>
+</div>
+
+<form method="post" class="settings-form">
+    {% csrf_token %}
+    
+    <!-- Site Information -->
+    <div class="settings-section">
+        <h2 class="section-title">Site Information</h2>
+        <div class="settings-grid">
+            <div class="form-group">
+                <label for="site_name">Site Name</label>
+                <input type="text" id="site_name" name="site_name" value="{{ settings.site_name|default:'Voluntree' }}" class="form-control" required>
+                <small class="form-help">The name of your volunteer platform</small>
+            </div>
+
+            <div class="form-group">
+                <label for="site_tagline">Site Tagline</label>
+                <input type="text" id="site_tagline" name="site_tagline" value="{{ settings.site_tagline|default:'' }}" class="form-control">
+                <small class="form-help">A short description of your platform</small>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="site_description">Site Description</label>
+                <textarea id="site_description" name="site_description" rows="4" class="form-control">{{ settings.site_description|default:'' }}</textarea>
+                <small class="form-help">Detailed description for SEO and about page</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Configuration -->
+    <div class="settings-section">
+        <h2 class="section-title">Email Configuration</h2>
+        <div class="settings-grid">
+            <div class="form-group">
+                <label for="admin_email">Admin Email</label>
+                <input type="email" id="admin_email" name="admin_email" value="{{ settings.admin_email|default:'' }}" class="form-control" required>
+                <small class="form-help">Primary email for system notifications</small>
+            </div>
+
+            <div class="form-group">
+                <label for="support_email">Support Email</label>
+                <input type="email" id="support_email" name="support_email" value="{{ settings.support_email|default:'' }}" class="form-control">
+                <small class="form-help">Email for user support inquiries</small>
+            </div>
+
+            <div class="form-group">
+                <label for="noreply_email">No-Reply Email</label>
+                <input type="email" id="noreply_email" name="noreply_email" value="{{ settings.noreply_email|default:'' }}" class="form-control">
+                <small class="form-help">Email for automated notifications</small>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="send_welcome_email" {% if settings.send_welcome_email %}checked{% endif %}>
+                    <span>Send welcome emails to new users</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="send_approval_emails" {% if settings.send_approval_emails %}checked{% endif %}>
+                    <span>Send approval/rejection emails to NGOs</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="send_event_reminders" {% if settings.send_event_reminders %}checked{% endif %}>
+                    <span>Send event reminder emails</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Settings -->
+    <div class="settings-section">
+        <h2 class="section-title">Event Configuration</h2>
+        <div class="settings-grid">
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="require_event_approval" {% if settings.require_event_approval %}checked{% endif %}>
+                    <span>Require admin approval for new events</span>
+                </label>
+                <small class="form-help">Events will need admin approval before being published</small>
+            </div>
+
+            <div class="form-group">
+                <label for="max_event_duration">Maximum Event Duration (days)</label>
+                <input type="number" id="max_event_duration" name="max_event_duration" value="{{ settings.max_event_duration|default:30 }}" class="form-control" min="1" max="365">
+                <small class="form-help">Maximum allowed duration for a single event</small>
+            </div>
+
+            <div class="form-group">
+                <label for="min_volunteers_per_event">Minimum Volunteers Per Event</label>
+                <input type="number" id="min_volunteers_per_event" name="min_volunteers_per_event" value="{{ settings.min_volunteers_per_event|default:1 }}" class="form-control" min="1">
+                <small class="form-help">Minimum number of volunteers required</small>
+            </div>
+
+            <div class="form-group">
+                <label for="max_volunteers_per_event">Maximum Volunteers Per Event</label>
+                <input type="number" id="max_volunteers_per_event" name="max_volunteers_per_event" value="{{ settings.max_volunteers_per_event|default:100 }}" class="form-control" min="1">
+                <small class="form-help">Maximum number of volunteers allowed</small>
+            </div>
+
+            <div class="form-group">
+                <label for="event_cancellation_hours">Event Cancellation Notice (hours)</label>
+                <input type="number" id="event_cancellation_hours" name="event_cancellation_hours" value="{{ settings.event_cancellation_hours|default:24 }}" class="form-control" min="1">
+                <small class="form-help">Minimum hours notice required to cancel an event</small>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="auto_complete_events" {% if settings.auto_complete_events %}checked{% endif %}>
+                    <span>Automatically mark events as completed after date</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Settings -->
+    <div class="settings-section">
+        <h2 class="section-title">Registration & User Settings</h2>
+        <div class="settings-grid">
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="allow_volunteer_registration" {% if settings.allow_volunteer_registration %}checked{% endif %}>
+                    <span>Allow volunteer registration</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="allow_ngo_registration" {% if settings.allow_ngo_registration %}checked{% endif %}>
+                    <span>Allow NGO registration</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="require_email_verification" {% if settings.require_email_verification %}checked{% endif %}>
+                    <span>Require email verification for new users</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="min_volunteer_age">Minimum Volunteer Age</label>
+                <input type="number" id="min_volunteer_age" name="min_volunteer_age" value="{{ settings.min_volunteer_age|default:13 }}" class="form-control" min="1" max="100">
+                <small class="form-help">Minimum age to register as volunteer</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- NGO Settings -->
+    <div class="settings-section">
+        <h2 class="section-title">NGO Settings</h2>
+        <div class="settings-grid">
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="require_ngo_verification" {% if settings.require_ngo_verification %}checked{% endif %}>
+                    <span>Require document verification for NGOs</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="auto_approve_verified_ngos" {% if settings.auto_approve_verified_ngos %}checked{% endif %}>
+                    <span>Auto-approve NGOs with valid documents</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="ngo_approval_time">NGO Approval Review Time (days)</label>
+                <input type="number" id="ngo_approval_time" name="ngo_approval_time" value="{{ settings.ngo_approval_time|default:3 }}" class="form-control" min="1">
+                <small class="form-help">Expected time to review NGO applications</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Settings -->
+    <div class="settings-section">
+        <h2 class="section-title">Notification Settings</h2>
+        <div class="settings-grid">
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="enable_push_notifications" {% if settings.enable_push_notifications %}checked{% endif %}>
+                    <span>Enable push notifications</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="enable_sms_notifications" {% if settings.enable_sms_notifications %}checked{% endif %}>
+                    <span>Enable SMS notifications</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="notify_on_new_event" {% if settings.notify_on_new_event %}checked{% endif %}>
+                    <span>Notify volunteers about new events</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="notify_on_event_update" {% if settings.notify_on_event_update %}checked{% endif %}>
+                    <span>Notify about event updates</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance Mode -->
+    <div class="settings-section">
+        <h2 class="section-title">Maintenance & Security</h2>
+        <div class="settings-grid">
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="maintenance_mode" {% if settings.maintenance_mode %}checked{% endif %}>
+                    <span>Enable maintenance mode</span>
+                </label>
+                <small class="form-help">Site will be unavailable to regular users</small>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="maintenance_message">Maintenance Message</label>
+                <textarea id="maintenance_message" name="maintenance_message" rows="3" class="form-control">{{ settings.maintenance_message|default:'We are currently performing maintenance. Please check back soon.' }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Button -->
+    <div class="settings-actions">
+        <button type="submit" class="btn-save">💾 Save Settings</button>
+        <button type="reset" class="btn-reset">↺ Reset</button>
+    </div>
+</form>
+{% endblock %}

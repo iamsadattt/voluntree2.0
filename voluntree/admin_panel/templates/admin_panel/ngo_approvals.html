@@ -1,0 +1,149 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}NGO Approvals - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>NGO Approvals</h1>
+    <p>Review and approve pending NGO registrations</p>
+</div>
+
+<!-- Filter Tabs -->
+<div class="filter-tabs">
+    <a href="?status=pending" class="tab {% if status_filter == 'pending' or not status_filter %}active{% endif %}">
+        Pending ({{ pending_count }})
+    </a>
+    <a href="?status=approved" class="tab {% if status_filter == 'approved' %}active{% endif %}">
+        Approved ({{ approved_count }})
+    </a>
+    <a href="?status=rejected" class="tab {% if status_filter == 'rejected' %}active{% endif %}">
+        Rejected ({{ rejected_count }})
+    </a>
+    <a href="?status=all" class="tab {% if status_filter == 'all' %}active{% endif %}">
+        All ({{ total_count }})
+    </a>
+</div>
+
+<!-- NGO List -->
+<div class="ngo-approvals-container">
+    {% if ngos %}
+        {% for ngo in ngos %}
+        <div class="ngo-approval-card">
+            <div class="ngo-card-header">
+                <div class="ngo-info">
+                    <div class="ngo-logo">
+                        {% if ngo.logo %}
+                            <img src="{{ ngo.logo.url }}" alt="{{ ngo.organization_name }}">
+                        {% else %}
+                            <div class="logo-placeholder">{{ ngo.organization_name|first|upper }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="ngo-details">
+                        <h3>{{ ngo.organization_name }}</h3>
+                        <p class="ngo-reg-number">Reg: {{ ngo.registration_number }}</p>
+                        <p class="ngo-contact">{{ ngo.email }} | {{ ngo.phone }}</p>
+                    </div>
+                </div>
+                <div class="ngo-status">
+                    <span class="status-badge status-{{ ngo.status }}">{{ ngo.get_status_display }}</span>
+                </div>
+            </div>
+
+            <div class="ngo-card-body">
+                <div class="ngo-description">
+                    <h4>Description</h4>
+                    <p>{{ ngo.description|truncatewords:30 }}</p>
+                </div>
+
+                <div class="ngo-meta">
+                    <div class="meta-item">
+                        <strong>Location:</strong> {{ ngo.city }}, {{ ngo.country }}
+                    </div>
+                    <div class="meta-item">
+                        <strong>Focus Areas:</strong> {{ ngo.focus_areas|truncatewords:8 }}
+                    </div>
+                    <div class="meta-item">
+                        <strong>Website:</strong> 
+                        {% if ngo.website %}
+                            <a href="{{ ngo.website }}" target="_blank">{{ ngo.website|truncatechars:40 }}</a>
+                        {% else %}
+                            Not provided
+                        {% endif %}
+                    </div>
+                    <div class="meta-item">
+                        <strong>Registered:</strong> {{ ngo.created_at|date:"M d, Y" }}
+                    </div>
+                </div>
+
+                {% if ngo.verification_document %}
+                <div class="ngo-documents">
+                    <h4>Verification Document</h4>
+                    <a href="{{ ngo.verification_document.url }}" target="_blank" class="btn-view-doc">
+                        📄 View Document
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="ngo-card-actions">
+                <a href="{% url 'admin_ngo_detail' ngo.id %}" class="btn-action btn-info">View Details</a>
+                
+                {% if ngo.status == 'pending' %}
+                    <form method="post" action="{% url 'admin_approve_ngo' ngo.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-action btn-success" onclick="return confirm('Are you sure you want to approve {{ ngo.organization_name }}?')">
+                            ✓ Approve
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'admin_reject_ngo' ngo.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-action btn-danger" onclick="return confirm('Are you sure you want to reject {{ ngo.organization_name }}?')">
+                            ✗ Reject
+                        </button>
+                    </form>
+                {% elif ngo.status == 'approved' %}
+                    <form method="post" action="{% url 'admin_reject_ngo' ngo.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-action btn-warning" onclick="return confirm('Are you sure you want to revoke approval for {{ ngo.organization_name }}?')">
+                            Revoke Approval
+                        </button>
+                    </form>
+                {% elif ngo.status == 'rejected' %}
+                    <form method="post" action="{% url 'admin_approve_ngo' ngo.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-action btn-success" onclick="return confirm('Are you sure you want to approve {{ ngo.organization_name }}?')">
+                            ✓ Approve
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Pagination (if needed) -->
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1&status={{ status_filter }}" class="page-link">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}" class="page-link">Previous</a>
+            {% endif %}
+
+            <span class="page-info">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}" class="page-link">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}&status={{ status_filter }}" class="page-link">Last</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="no-data-message">
+            <div class="no-data-icon">📋</div>
+            <h3>No NGOs Found</h3>
+            <p>There are no NGOs with status: {{ status_filter|default:"pending" }}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

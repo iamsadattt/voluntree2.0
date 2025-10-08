@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel - Voluntree{% endblock %}</title>
+
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="{% static 'css/admin_base.css' %}">
+
+    <!-- Page-specific CSS -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Admin Top Navigation -->
+    <nav class="admin-navbar">
+        <div class="admin-nav-container">
+            <div class="admin-logo">
+                <span class="logo-icon">🌳</span>
+                <span class="logo-text">Voluntree Admin</span>
+            </div>
+
+            <ul class="admin-nav-links">
+                <li><a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">Dashboard</a></li>
+                <li><a href="{% url 'admin_ngo_approvals' %}" class="{% if request.resolver_match.url_name == 'admin_ngo_approvals' %}active{% endif %}">NGO Approvals</a></li>
+                <li><a href="{% url 'admin_users' %}" class="{% if request.resolver_match.url_name == 'admin_users' %}active{% endif %}">Users</a></li>
+                <li><a href="{% url 'admin_ngos' %}" class="{% if request.resolver_match.url_name == 'admin_ngos' %}active{% endif %}">NGOs</a></li>
+                <li><a href="{% url 'admin_events' %}" class="{% if request.resolver_match.url_name == 'admin_events' %}active{% endif %}">Events</a></li>
+                <li><a href="{% url 'admin_settings' %}" class="{% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">Settings</a></li>
+            </ul>
+
+            <div class="admin-user-menu">
+                <span class="admin-username">{{ user.username }}</span>
+                <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Admin Messages -->
+    {% if messages %}
+    <div class="admin-messages-container">
+        {% for message in messages %}
+        <div class="admin-alert admin-alert-{{ message.tags }}">
+            {{ message }}
+            <button class="close-alert">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Admin Content -->
+    <main class="admin-main">
+        <div class="admin-container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Admin Footer -->
+    <footer class="admin-footer">
+        <div class="admin-footer-content">
+            <p>&copy; 2025 Voluntree Admin Panel. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Admin JavaScript -->
+    <script src="{% static 'js/admin_base.js' %}"></script>
+
+    <!-- Page-specific JavaScript -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

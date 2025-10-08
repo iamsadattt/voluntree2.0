@@ -1,0 +1,103 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Users Management - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Users Management</h1>
+    <p>Manage volunteer accounts and profiles</p>
+</div>
+
+<!-- Search and Filter -->
+<div class="admin-toolbar">
+    <div class="search-box">
+        <form method="get" action="">
+            <input type="text" name="search" placeholder="Search by name, username, or email..." value="{{ search_query }}" class="search-input">
+            <button type="submit" class="btn-search">🔍 Search</button>
+        </form>
+    </div>
+    <div class="toolbar-info">
+        <p>Total Volunteers: <strong>{{ total_volunteers }}</strong></p>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="table-container">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Profile</th>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Events Completed</th>
+                <th>Hours Completed</th>
+                <th>Joined Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if volunteers %}
+                {% for volunteer in volunteers %}
+                <tr>
+                    <td>
+                        <div class="user-avatar">
+                            {% if volunteer.volunteer_profile.profile_picture %}
+                                <img src="{{ volunteer.volunteer_profile.profile_picture.url }}" alt="{{ volunteer.username }}">
+                            {% else %}
+                                <div class="avatar-placeholder">{{ volunteer.first_name|first|upper|default:"V" }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>{{ volunteer.get_full_name|default:"-" }}</td>
+                    <td>{{ volunteer.username }}</td>
+                    <td>{{ volunteer.email }}</td>
+                    <td>{{ volunteer.volunteer_profile.phone|default:"-" }}</td>
+                    <td class="text-center">{{ volunteer.volunteer_profile.events_completed }}</td>
+                    <td class="text-center">{{ volunteer.volunteer_profile.hours_completed }}</td>
+                    <td>{{ volunteer.date_joined|date:"M d, Y" }}</td>
+                    <td class="actions-cell">
+                        <a href="{% url 'admin_user_detail' volunteer.id %}" class="btn-action-small btn-info" title="View Details">👁️</a>
+                        <a href="{% url 'admin_user_edit' volunteer.id %}" class="btn-action-small btn-warning" title="Edit">✏️</a>
+                        <form method="post" action="{% url 'admin_user_delete' volunteer.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action-small btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete {{ volunteer.username }}? This action cannot be undone.')">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="no-data">
+                        {% if search_query %}
+                            No volunteers found matching "{{ search_query }}"
+                        {% else %}
+                            No volunteers registered yet
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">First</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">Previous</a>
+    {% endif %}
+
+    <span class="page-info">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">Next</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">Last</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

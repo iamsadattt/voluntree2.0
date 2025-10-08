@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     'accounts',
     'core',
     'events',
+    'admin_panel',
+
 ]
 
 MIDDLEWARE = [

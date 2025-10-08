@@ -8,6 +8,7 @@ urlpatterns = [
     path('', include('core.urls')),
     path('accounts/', include('accounts.urls')),
     path('events/', include('events.urls')),
+    path('admin-panel/', include('admin_panel.urls')),
 ]
 
 # Add this - it serves static files in development
