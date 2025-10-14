@@ -3,6 +3,10 @@
 
 {% block title %}Browse Events - Voluntree{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/event/event_list.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="events-page">
     <div class="events-container">
@@ -97,4 +101,8 @@
 
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/events/event_list.js' %}"></script>
 {% endblock %}
