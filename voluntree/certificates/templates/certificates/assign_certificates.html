@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assign Certificates - {{ event.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/assign_certificates.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="assign-container">
+    <div class="page-header">
+        <h1>Assign Certificates</h1>
+        <p class="event-title">{{ event.title }}</p>
+        
+        <div class="event-info">
+            <div class="info-item">
+                <span>📅</span>
+                <span>{{ event.date|date:"F d, Y" }}</span>
+            </div>
+            <div class="info-item">
+                <span>📍</span>
+                <span>{{ event.location }}</span>
+            </div>
+            <div class="info-item">
+                <span class="certificate-status">✓ Certificate Approved</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="volunteers-section">
+        <div class="section-header">
+            <h2>Approved Volunteers ({{ registrations.count }})</h2>
+            <div class="select-all-container">
+                <input type="checkbox" id="selectAll" class="select-all-checkbox">
+                <label for="selectAll">Select All</label>
+            </div>
+        </div>
+
+        <form method="POST" id="assignForm">
+            {% csrf_token %}
+            
+            {% if registrations %}
+            <div class="volunteers-list">
+                {% for registration in registrations %}
+                <div class="volunteer-item {% if registration.volunteer.id in assigned_volunteer_ids %}assigned{% endif %}">
+                    {% if registration.volunteer.id not in assigned_volunteer_ids %}
+                    <input type="checkbox" name="volunteers" value="{{ registration.volunteer.id }}" class="volunteer-checkbox">
+                    {% else %}
+                    <input type="checkbox" disabled class="volunteer-checkbox" checked>
+                    {% endif %}
+                    
+                    {% if registration.volunteer.volunteer_profile.profile_picture %}
+                    <img src="{{ registration.volunteer.volunteer_profile.profile_picture.url }}" alt="{{ registration.volunteer.username }}" class="volunteer-avatar">
+                    {% else %}
+                    <div class="avatar-placeholder">{{ registration.volunteer.first_name|first|upper }}</div>
+                    {% endif %}
+                    
+                    <div class="volunteer-info">
+                        <div class="volunteer-name">
+                            {{ registration.volunteer.get_full_name|default:registration.volunteer.username }}
+                        </div>
+                        <div class="volunteer-details">
+                            <span>📧 {{ registration.volunteer.email }}</span>
+                            <span>📞 {{ registration.volunteer.volunteer_profile.phone|default:"N/A" }}</span>
+                            <span>📅 Applied {{ registration.applied_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    
+                    {% if registration.volunteer.id in assigned_volunteer_ids %}
+                    <span class="assigned-badge">✓ Already Assigned</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-volunteers">
+                <p>No approved volunteers for this event yet.</p>
+                <a href="{% url 'manage_registrations' event.id %}" class="btn-secondary">Manage Registrations</a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if registrations %}
+    <div class="actions-bar">
+        <div class="selected-count">
+            <span id="selectedCount">0</span> volunteer(s) selected
+        </div>
+        <div class="action-buttons">
+            <a href="{% url 'ngo_events' %}" class="btn-secondary">Cancel</a>
+            <button type="submit" form="assignForm" class="btn-primary" id="assignBtn">
+                Assign Certificate
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/assign_certificates.js' %}"></script>
+{% endblock %}

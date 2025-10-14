@@ -68,7 +68,7 @@
                         </div>
 
                         <div class="registration-actions">
-                            <a href="{% url 'profile' %}?user={{ registration.volunteer.username }}" class="btn-view-profile">View Profile</a>
+                            <a href="{% url 'view_volunteer_profile' registration.volunteer.id %}" class="btn-view-profile">View Profile</a>
                             
                             {% if registration.status == 'pending' %}
                                 <form method="post" action="{% url 'approve_registration' registration.pk %}" style="display: inline;">

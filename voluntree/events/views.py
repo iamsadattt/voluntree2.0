@@ -1,3 +1,5 @@
+#events/views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -6,6 +8,7 @@ from django.utils import timezone
 from .models import Event, EventRegistration
 from .forms import EventForm
 from accounts.models import NGO
+from certificates.models import Certificate
 
 
 def event_list(request):
@@ -81,7 +84,17 @@ def event_create(request):
             event = form.save(commit=False)
             event.ngo = ngo
             event.save()
-            messages.success(request, 'Event created successfully!')
+
+            # Handle certificate upload
+            certificate_file = form.cleaned_data.get('certificate_file')
+            if certificate_file:
+                Certificate.objects.create(
+                    event=event,
+                    certificate_file=certificate_file,
+                    status='pending'
+                )
+
+            messages.success(request, 'Event created successfully! Certificate is pending admin approval.')
             return redirect('ngo_events')
     else:
         form = EventForm()
@@ -106,7 +119,23 @@ def event_edit(request, pk):
     if request.method == 'POST':
         form = EventForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
-            form.save()
+            event = form.save()
+
+            # Handle certificate upload/replacement
+            certificate_file = form.cleaned_data.get('certificate_file')
+            if certificate_file:
+                # Delete old certificate if exists
+                if hasattr(event, 'certificate'):
+                    event.certificate.delete()
+
+                # Create new certificate (pending approval)
+                Certificate.objects.create(
+                    event=event,
+                    certificate_file=certificate_file,
+                    status='pending'
+                )
+                messages.info(request, 'New certificate uploaded. Waiting for admin approval.')
+
             messages.success(request, 'Event updated successfully!')
             return redirect('ngo_events')
     else:

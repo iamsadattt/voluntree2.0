@@ -1,3 +1,5 @@
+# admin_panel/urls.py
+
 from django.urls import path
 from . import views
 
@@ -27,6 +29,10 @@ urlpatterns = [
     path('event/<int:event_id>/detail/', views.event_detail, name='admin_event_detail'),
     path('event/<int:event_id>/edit/', views.event_edit, name='admin_event_edit'),
     path('event/<int:event_id>/delete/', views.event_delete, name='admin_event_delete'),
+
+    # Certificate Approval (NEW)
+    path('event/<int:event_id>/certificate/approve/', views.approve_certificate, name='admin_approve_certificate'),
+    path('event/<int:event_id>/certificate/reject/', views.reject_certificate, name='admin_reject_certificate'),
 
     # Settings
     path('settings/', views.platform_settings, name='admin_settings'),

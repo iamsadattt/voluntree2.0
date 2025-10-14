@@ -39,6 +39,7 @@
                 <th>Location</th>
                 <th>Volunteers</th>
                 <th>Status</th>
+                <th>Certificate</th>
                 <th>Created</th>
                 <th>Actions</th>
             </tr>
@@ -67,6 +68,15 @@
                         {% endif %}
                     </td>
                     <td><span class="status-badge status-{{ event.status }}">{{ event.get_status_display }}</span></td>
+                    <td>
+                        {% if event.has_certificate %}
+                            <span class="status-badge status-{{ event.certificate.status }}">
+                                {{ event.certificate.get_status_display }}
+                            </span>
+                        {% else %}
+                            <span class="status-badge status-none">None</span>
+                        {% endif %}
+                    </td>
                     <td>{{ event.created_at|date:"M d, Y" }}</td>
                     <td class="actions-cell">
                         <a href="{% url 'admin_event_detail' event.id %}" class="btn-action-small btn-info" title="View Details">👁️</a>
@@ -80,7 +90,7 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="9" class="no-data">
+                    <td colspan="10" class="no-data">
                         {% if search_query %}
                             No events found matching "{{ search_query }}"
                         {% else %}

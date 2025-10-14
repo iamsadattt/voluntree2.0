@@ -1,3 +1,5 @@
+# events/models.py
+
 from django.db import models
 from django.utils import timezone
 from accounts.models import User, NGO
@@ -12,7 +14,7 @@ class Event(models.Model):
     ngo = models.ForeignKey(NGO, on_delete=models.CASCADE, related_name='events')
     title = models.CharField(max_length=200)
     description = models.TextField()
-    image = models.ImageField(upload_to='events/', blank=True, null=True)  # ADD THIS
+    image = models.ImageField(upload_to='events/', blank=True, null=True)
     date = models.DateTimeField()
     location = models.CharField(max_length=300)
     required_skills = models.TextField(blank=True, help_text="Comma-separated skills")
@@ -43,6 +45,17 @@ class Event(models.Model):
     def is_past(self):
         """Check if event date has passed"""
         return self.date < timezone.now()
+
+    # ADD THESE TWO METHODS HERE (INSIDE THE CLASS)
+    def has_certificate(self):
+        """Check if event has a certificate uploaded"""
+        return hasattr(self, 'certificate')
+
+    def get_certificate_status(self):
+        """Get certificate approval status"""
+        if self.has_certificate():
+            return self.certificate.status
+        return None
 
     class Meta:
         ordering = ['-created_at']

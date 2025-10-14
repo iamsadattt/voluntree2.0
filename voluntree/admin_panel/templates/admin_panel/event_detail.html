@@ -1,0 +1,212 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}{{ event.title }} - Event Details{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+    <div class="detail-header">
+        <div>
+            <h1>{{ event.title }}</h1>
+            <p class="detail-subtitle">Event Details & Management</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'admin_events' %}" class="btn-secondary">← Back to Events</a>
+        </div>
+    </div>
+
+    <!-- Event Information Card -->
+    <div class="detail-card">
+        <h2 class="card-title">Event Information</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">NGO:</span>
+                <span class="info-value">
+                    <a href="{% url 'admin_ngo_detail' event.ngo.id %}">{{ event.ngo.organization_name }}</a>
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Date & Time:</span>
+                <span class="info-value">{{ event.date|date:"F d, Y - g:i A" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Location:</span>
+                <span class="info-value">{{ event.location }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Status:</span>
+                <span class="status-badge status-{{ event.status }}">{{ event.get_status_display }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Max Volunteers:</span>
+                <span class="info-value">{{ event.max_volunteers }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Registered:</span>
+                <span class="info-value">{{ event.get_registered_count }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Pending Applications:</span>
+                <span class="info-value">{{ event.get_pending_count }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Created:</span>
+                <span class="info-value">{{ event.created_at|date:"M d, Y" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Description -->
+    <div class="detail-card">
+        <h2 class="card-title">Description</h2>
+        <p class="description-text">{{ event.description }}</p>
+    </div>
+
+    <!-- Required Skills -->
+    {% if event.required_skills %}
+    <div class="detail-card">
+        <h2 class="card-title">Required Skills</h2>
+        <div class="tags-container">
+            {% for skill in event.required_skills.split ',' %}
+            <span class="tag">{{ skill|trim }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- CERTIFICATE SECTION -->
+    <div class="detail-card certificate-card">
+        <h2 class="card-title">Certificate Management</h2>
+        {% if event.has_certificate %}
+        <div class="certificate-details">
+            <div class="certificate-status-row">
+                <span class="info-label">Status:</span>
+                <span class="status-badge status-{{ event.certificate.status }}">
+                    {{ event.certificate.get_status_display }}
+                </span>
+            </div>
+            
+            <div class="certificate-file-row">
+                <span class="info-label">Certificate File:</span>
+                <a href="{{ event.certificate.certificate_file.url }}" target="_blank" class="btn-download" download>
+                    📥 Download & Review Certificate
+                </a>
+            </div>
+
+            <div class="certificate-info-grid">
+                <div class="info-item">
+                    <span class="info-label">Uploaded:</span>
+                    <span class="info-value">{{ event.certificate.uploaded_at|date:"M d, Y - g:i A" }}</span>
+                </div>
+                {% if event.certificate.approved_at %}
+                <div class="info-item">
+                    <span class="info-label">Approved:</span>
+                    <span class="info-value">{{ event.certificate.approved_at|date:"M d, Y - g:i A" }}</span>
+                </div>
+                {% endif %}
+                {% if event.certificate.rejected_at %}
+                <div class="info-item">
+                    <span class="info-label">Rejected:</span>
+                    <span class="info-value">{{ event.certificate.rejected_at|date:"M d, Y - g:i A" }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- CERTIFICATE APPROVAL ACTIONS -->
+            <div class="certificate-actions">
+                {% if event.certificate.status == 'pending' %}
+                <div class="action-buttons-row">
+                    <form method="POST" action="{% url 'admin_approve_certificate' event.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-approve" onclick="return confirm('Approve this certificate? NGO will be able to assign it to volunteers.');">
+                            ✓ Approve Certificate
+                        </button>
+                    </form>
+                    <form method="POST" action="{% url 'admin_reject_certificate' event.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-reject" onclick="return confirm('Reject and remove this certificate? NGO will need to upload a new one.');">
+                            ✗ Reject & Remove Certificate
+                        </button>
+                    </form>
+                </div>
+                <p class="action-help-text">
+                    ⚠️ Review the certificate carefully. Rejecting will permanently delete it and NGO must upload a new one.
+                </p>
+                {% elif event.certificate.status == 'approved' %}
+                <div class="action-buttons-row">
+                    <span class="success-message">✓ This certificate has been approved and can be assigned to volunteers by the NGO.</span>
+                    <form method="POST" action="{% url 'admin_reject_certificate' event.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-reject-small" onclick="return confirm('Revoke approval and remove this certificate? This action cannot be undone.');">
+                            Revoke Approval
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="no-certificate">
+            <p class="warning-text">❌ No certificate has been uploaded for this event.</p>
+            <p class="info-text">The NGO needs to upload a certificate template for this event before volunteers can receive certificates.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Event Image -->
+    {% if event.image %}
+    <div class="detail-card">
+        <h2 class="card-title">Event Image</h2>
+        <div class="event-image-container">
+            <img src="{{ event.image.url }}" alt="{{ event.title }}" class="event-detail-image">
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Volunteer Registrations -->
+    <div class="detail-card">
+        <h2 class="card-title">Volunteer Registrations ({{ registrations.count }})</h2>
+        {% if registrations %}
+        <div class="table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Volunteer</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Applied Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for registration in registrations %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'admin_user_detail' registration.volunteer.id %}">
+                                {{ registration.volunteer.get_full_name|default:registration.volunteer.username }}
+                            </a>
+                        </td>
+                        <td>{{ registration.volunteer.email }}</td>
+                        <td>{{ registration.volunteer.volunteer_profile.phone|default:"N/A" }}</td>
+                        <td>{{ registration.applied_at|date:"M d, Y - g:i A" }}</td>
+                        <td><span class="status-badge status-{{ registration.status }}">{{ registration.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="no-data">No volunteer registrations yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="detail-card danger-zone">
+        <h2 class="card-title">Danger Zone</h2>
+        <p class="danger-text">Deleting this event will remove all registrations and certificates. This action cannot be undone.</p>
+        <form method="POST" action="{% url 'admin_event_delete' event.id %}" onsubmit="return confirm('Are you sure you want to delete this event? This action cannot be undone and will delete all registrations and certificates.');">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger">🗑️ Delete Event</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

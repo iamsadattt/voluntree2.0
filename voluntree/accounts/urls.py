@@ -1,3 +1,5 @@
+#accounts/urls.py
+
 from django.urls import path
 from . import views
 
@@ -10,4 +12,5 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('profile/edit/volunteer/', views.edit_profile_volunteer, name='edit_profile_volunteer'),  # NEW
     path('profile/edit/ngo/', views.edit_profile_ngo, name='edit_profile_ngo'),  # NEW
+    path('volunteer/<int:user_id>/', views.view_volunteer_profile, name='view_volunteer_profile'),
 ]

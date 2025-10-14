@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import VolunteerRegistrationForm, NGORegistrationForm, CustomLoginForm
 from .models import User, VolunteerProfile, NGO
+from django.shortcuts import get_object_or_404
 
 
 def register_choice(request):
@@ -182,3 +183,16 @@ def edit_profile_ngo(request):
         'profile': profile,
     }
     return render(request, 'accounts/edit_profile_ngo.html', context)
+
+
+def view_volunteer_profile(request, user_id):
+    """Public view of a volunteer's profile"""
+    volunteer = get_object_or_404(User, id=user_id, user_type='volunteer')
+    profile = VolunteerProfile.objects.get(user=volunteer)
+
+    context = {
+        'profile': profile,
+        'skills_list': [s.strip() for s in profile.skills.split(',') if s.strip()] if profile.skills else [],
+        'interests_list': [i.strip() for i in profile.interests.split(',') if i.strip()] if profile.interests else [],
+    }
+    return render(request, 'accounts/volunteer_profile.html', context)

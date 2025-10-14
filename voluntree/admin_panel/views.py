@@ -1,3 +1,5 @@
+#admin_panel/views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
@@ -7,6 +9,9 @@ from datetime import timedelta
 from accounts.models import User, VolunteerProfile, NGO
 from events.models import Event, EventRegistration
 from .models import PlatformSettings
+from certificates.models import Certificate
+from django.utils import timezone
+
 
 
 def is_admin(user):
@@ -369,3 +374,41 @@ def event_edit(request, event_id):
     """Edit event - placeholder for future implementation"""
     messages.info(request, 'Edit functionality coming soon!')
     return redirect('admin_events')
+
+
+@login_required
+@user_passes_test(is_admin)
+def approve_certificate(request, event_id):
+    """Admin approves a certificate"""
+    if request.method == 'POST':
+        event = get_object_or_404(Event, id=event_id)
+
+        if hasattr(event, 'certificate'):
+            certificate = event.certificate
+            certificate.status = 'approved'
+            certificate.approved_at = timezone.now()
+            certificate.rejected_at = None
+            certificate.save()
+            messages.success(request, f'Certificate for "{event.title}" has been approved.')
+        else:
+            messages.error(request, 'This event does not have a certificate.')
+
+    return redirect('admin_event_detail', event_id=event_id)
+
+
+@login_required
+@user_passes_test(is_admin)
+def reject_certificate(request, event_id):
+    """Admin rejects and deletes a certificate"""
+    if request.method == 'POST':
+        event = get_object_or_404(Event, id=event_id)
+
+        if hasattr(event, 'certificate'):
+            certificate = event.certificate
+            certificate.delete()  # Delete the certificate completely
+            messages.warning(request,
+                             f'Certificate for "{event.title}" has been rejected and removed. NGO must upload a new one.')
+        else:
+            messages.error(request, 'This event does not have a certificate.')
+
+    return redirect('admin_event_detail', event_id=event_id)

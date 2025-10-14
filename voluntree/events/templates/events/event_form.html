@@ -6,7 +6,7 @@
 {% block content %}
 <div class="event-form-page">
     <div class="form-container">
-        
+
         <a href="{% url 'ngo_events' %}" class="back-button">← Back to My Events</a>
 
         <div class="form-card">
@@ -108,6 +108,45 @@
                                 {% for error in form.status.errors %}<li>{{ error }}</li>{% endfor %}
                             </ul>
                         {% endif %}
+                    </div>
+                </div>
+
+                <!-- CERTIFICATE UPLOAD SECTION -->
+                <div class="form-group certificate-section">
+                    <label for="{{ form.certificate_file.id_for_label }}">
+                        Certificate Template <span class="required">*</span>
+                        {% if event and event.has_certificate %}
+                            <span class="certificate-status-badge status-{{ event.certificate.status }}">
+                                {{ event.certificate.get_status_display }}
+                            </span>
+                        {% endif %}
+                    </label>
+                    {{ form.certificate_file }}
+
+                    {% if event and event.has_certificate %}
+                        <div class="certificate-info-box">
+                            <p><strong>Current Certificate:</strong>
+                                <a href="{{ event.certificate.certificate_file.url }}" target="_blank" class="certificate-link">
+                                    📄 View Current Certificate
+                                </a>
+                            </p>
+                            <p class="certificate-status-text">
+                                Status: <strong>{{ event.certificate.get_status_display }}</strong>
+                            </p>
+                            <span class="help-text">Upload a new file only if you want to replace it (requires admin re-approval)</span>
+                        </div>
+                    {% else %}
+                        <span class="help-text">Upload certificate template (PDF recommended). This will be reviewed by admin before you can assign it to volunteers.</span>
+                    {% endif %}
+
+                    {% if form.certificate_file.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.certificate_file.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    <div class="certificate-note">
+                        <strong>⚠️ Important:</strong> Please upload a PDF file for best results. Other formats (Word, Image) are accepted but may not be approved by admin.
                     </div>
                 </div>
 
