@@ -276,7 +276,7 @@
 
             function updateCounter() {
                 const remaining = maxLength - descriptionTextarea.value.length;
-                counter.textContent = ${descriptionTextarea.value.length} / ${maxLength} characters;
+                counter.textContent = $;{descriptionTextarea.value.length} / ${maxLength} characters;
 
                 if (remaining < 100) {
                     counter.style.color = '#ef4444';
