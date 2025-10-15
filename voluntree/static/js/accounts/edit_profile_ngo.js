@@ -1,40 +1,32 @@
-// Edit NGO Profile JavaScript - Matching Voluntree Design Language
+// Edit Profile NGO JavaScript
+
 (function() {
     'use strict';
 
     document.addEventListener('DOMContentLoaded', function() {
 
         // ===========================
-        // Cache DOM Elements
+        // Logo Preview
         // ===========================
-        const form = document.getElementById('editProfileForm');
         const logoInput = document.getElementById('id_logo');
         const previewImage = document.getElementById('previewImage');
         const previewPlaceholder = document.getElementById('previewPlaceholder');
-        const saveButton = document.querySelector('.btn-save');
-        const formInputs = document.querySelectorAll('.form-input, .form-textarea');
-        const formCards = document.querySelectorAll('.form-card');
 
-        // ===========================
-        // Logo Preview Functionality
-        // ===========================
         if (logoInput) {
             logoInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
 
                 if (file) {
-                    // Validate file type
-                    const validTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
-                    if (!validTypes.includes(file.type)) {
-                        showNotification('Please upload a JPG, PNG, or SVG file', 'error');
+                    // Validate file size (5MB max)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('File size must be less than 5MB');
                         this.value = '';
                         return;
                     }
 
-                    // Validate file size (5MB)
-                    const maxSize = 5 * 1024 * 1024;
-                    if (file.size > maxSize) {
-                        showNotification('File size must be less than 5MB', 'error');
+                    // Validate file type
+                    if (!file.type.match('image.*')) {
+                        alert('Please select a valid image file');
                         this.value = '';
                         return;
                     }
@@ -45,435 +37,529 @@
                         if (previewImage) {
                             previewImage.src = event.target.result;
                             previewImage.style.display = 'block';
-                            if (previewPlaceholder) {
-                                previewPlaceholder.style.display = 'none';
-                            }
                         } else if (previewPlaceholder) {
                             const img = document.createElement('img');
                             img.src = event.target.result;
+                            img.alt = 'Organization Logo';
                             img.id = 'previewImage';
                             img.className = 'preview-image';
-                            previewPlaceholder.parentNode.replaceChild(img, previewPlaceholder);
-                        }
-
-                        // Add animation
-                        const currentPicture = document.querySelector('.current-picture');
-                        if (currentPicture) {
-                            currentPicture.style.animation = 'zoomIn 0.5s ease';
+                            previewPlaceholder.replaceWith(img);
                         }
                     };
                     reader.readAsDataURL(file);
-
-                    showNotification('Logo preview updated', 'success');
                 }
             });
+        }
+
+        // ===========================
+        // Verification Document Upload
+        // ===========================
+        const docInput = document.getElementById('id_verification_document');
+
+        if (docInput) {
+            docInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+
+                if (file) {
+                    // Validate file size (10MB max)
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('Document size must be less than 10MB');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Validate file type
+                    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                    if (!allowedTypes.includes(file.type)) {
+                        alert('Please upload a PDF, DOC, or DOCX file');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Show selected file name
+                    showDocumentSelected(file.name);
+                }
+            });
+        }
+
+        function showDocumentSelected(fileName) {
+            const docGroup = document.getElementById('id_verification_document').parentElement;
+            let fileIndicator = docGroup.querySelector('.file-indicator');
+
+            if (!fileIndicator) {
+                fileIndicator = document.createElement('div');
+                fileIndicator.className = 'file-indicator';
+                docGroup.appendChild(fileIndicator);
+            }
+
+            fileIndicator.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Selected: ${fileName}</span>
+            `;
+            fileIndicator.style.display = 'flex';
         }
 
         // ===========================
         // Form Validation
         // ===========================
-        function validateField(field) {
-            const value = field.value.trim();
-            const fieldName = field.name;
-            let isValid = true;
-            let message = '';
+        const editForm = document.getElementById('editProfileForm');
 
-            // Remove previous validation
-            field.classList.remove('error', 'success');
-            const existingMessage = field.parentNode.querySelector('.validation-message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                let isValid = true;
+                const errors = [];
 
-            // Required field validation
-            if (field.hasAttribute('required') && !value) {
-                isValid = false;
-                message = 'This field is required';
-            }
-
-            // Email validation
-            if (fieldName === 'email' && value) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(value)) {
+                // Organization Name validation
+                const orgName = document.getElementById('id_organization_name');
+                if (orgName && (!orgName.value.trim() || orgName.value.trim().length < 3)) {
                     isValid = false;
-                    message = 'Please enter a valid email address';
+                    errors.push('Organization name must be at least 3 characters');
+                    orgName.classList.add('error');
+                } else if (orgName) {
+                    orgName.classList.remove('error');
                 }
-            }
 
-            // URL validation
-            if (fieldName === 'website' && value) {
-                try {
-                    new URL(value);
-                    if (!value.startsWith('http://') && !value.startsWith('https://')) {
+                // Email validation
+                const email = document.getElementById('id_email');
+                if (email && email.value.trim()) {
+                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailPattern.test(email.value.trim())) {
                         isValid = false;
-                        message = 'URL must start with http:// or https://';
-                    }
-                } catch {
-                    isValid = false;
-                    message = 'Please enter a valid URL';
-                }
-            }
-
-            // Phone validation
-            if (fieldName === 'phone' && value) {
-                const phoneRegex = /^[\d\s\-\+\(\)]+$/;
-                if (!phoneRegex.test(value) || value.length < 10) {
-                    isValid = false;
-                    message = 'Please enter a valid phone number';
-                }
-            }
-
-            // Apply validation styling
-            if (!isValid) {
-                field.classList.add('error');
-                showFieldMessage(field, message, 'error');
-            } else if (value) {
-                field.classList.add('success');
-            }
-
-            return isValid;
-        }
-
-        function showFieldMessage(field, message, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `validation-message ${type}`;
-            messageDiv.innerHTML = `
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    ${type === 'error' 
-                        ? '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>'
-                        : '<path d="M20 6L9 17l-5-5"></path>'
-                    }
-                </svg>
-                <span>${message}</span>
-            `;
-            field.parentNode.appendChild(messageDiv);
-        }
-
-        // Add real-time validation
-        formInputs.forEach(input => {
-            input.addEventListener('blur', function() {
-                validateField(this);
-            });
-
-            input.addEventListener('input', debounce(function() {
-                if (this.classList.contains('error')) {
-                    validateField(this);
-                }
-            }, 500));
-        });
-
-        // ===========================
-        // Form Submission
-        // ===========================
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                // Validate all fields
-                let isFormValid = true;
-                formInputs.forEach(input => {
-                    if (!validateField(input)) {
-                        isFormValid = false;
-                    }
-                });
-
-                if (!isFormValid) {
-                    showNotification('Please fix the errors before submitting', 'error');
-                    scrollToFirstError();
-                    return;
-                }
-
-                // Show loading state
-                if (saveButton) {
-                    saveButton.classList.add('loading');
-                    saveButton.disabled = true;
-                }
-
-                // Disable form
-                formInputs.forEach(input => {
-                    input.disabled = true;
-                });
-
-                // Submit the form
-                this.submit();
-            });
-        }
-
-        // ===========================
-        // Character Counter for Textareas
-        // ===========================
-        const textareas = document.querySelectorAll('.form-textarea');
-        textareas.forEach(textarea => {
-            const maxLength = textarea.getAttribute('maxlength');
-            if (maxLength) {
-                const counter = document.createElement('div');
-                counter.className = 'character-counter';
-                counter.style.cssText = `
-                    text-align: right;
-                    color: #6b7280;
-                    font-size: 0.875rem;
-                    margin-top: 0.5rem;
-                `;
-                textarea.parentNode.appendChild(counter);
-
-                function updateCounter() {
-                    const remaining = maxLength - textarea.value.length;
-                    counter.textContent = `${remaining} characters remaining`;
-
-                    if (remaining < 20) {
-                        counter.style.color = '#ef4444';
-                    } else if (remaining < 50) {
-                        counter.style.color = '#f59e0b';
+                        errors.push('Please enter a valid email address');
+                        email.classList.add('error');
                     } else {
-                        counter.style.color = '#6b7280';
+                        email.classList.remove('error');
                     }
                 }
 
-                textarea.addEventListener('input', updateCounter);
-                updateCounter();
+                // Phone validation
+                const phone = document.getElementById('id_phone');
+                if (phone && phone.value.trim()) {
+                    const phonePattern = /^[\d\s\-\+\(\)]+$/;
+                    if (!phonePattern.test(phone.value.trim()) || phone.value.trim().length < 10) {
+                        isValid = false;
+                        errors.push('Please enter a valid phone number (at least 10 digits)');
+                        phone.classList.add('error');
+                    } else {
+                        phone.classList.remove('error');
+                    }
+                }
+
+                // Website validation
+                const website = document.getElementById('id_website');
+                if (website && website.value.trim()) {
+                    try {
+                        new URL(website.value.trim());
+                        website.classList.remove('error');
+                    } catch (err) {
+                        isValid = false;
+                        errors.push('Please enter a valid website URL (e.g., https://example.org)');
+                        website.classList.add('error');
+                    }
+                }
+
+                // Description validation
+                const description = document.getElementById('id_description');
+                if (description && description.value.trim().length < 50) {
+                    isValid = false;
+                    errors.push('Organization description must be at least 50 characters');
+                    description.classList.add('error');
+                } else if (description) {
+                    description.classList.remove('error');
+                }
+
+                // Focus Areas validation
+                const focusAreas = document.getElementById('id_focus_areas');
+                if (focusAreas && focusAreas.value.trim().length < 3) {
+                    isValid = false;
+                    errors.push('Please specify at least one focus area');
+                    focusAreas.classList.add('error');
+                } else if (focusAreas) {
+                    focusAreas.classList.remove('error');
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    showErrors(errors);
+                }
+            });
+        }
+
+        function showErrors(errors) {
+            // Remove existing error messages
+            const existingError = document.querySelector('.validation-errors');
+            if (existingError) {
+                existingError.remove();
             }
-        });
+
+            if (errors.length > 0) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'validation-errors';
+                errorDiv.innerHTML = `
+                    <h3>Please correct the following errors:</h3>
+                    <ul>${errors.map(error => <li>${error}</li>).join('')}</ul>
+                `;
+
+                const form = document.getElementById('editProfileForm');
+                form.insertBefore(errorDiv, form.firstChild);
+
+                // Scroll to errors
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Auto-remove after 7 seconds
+                setTimeout(() => {
+                    errorDiv.style.opacity = '0';
+                    setTimeout(() => errorDiv.remove(), 300);
+                }, 7000);
+            }
+        }
 
         // ===========================
-        // Auto-save Draft (to localStorage)
+        // Auto-save Draft
         // ===========================
+        let autoSaveTimeout;
+        const formInputs = editForm ? editForm.querySelectorAll('input:not([type="file"]), textarea') : [];
+
+        formInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                clearTimeout(autoSaveTimeout);
+                autoSaveTimeout = setTimeout(() => {
+                    saveDraft();
+                }, 2000);
+            });
+        });
+
         function saveDraft() {
             const formData = {};
             formInputs.forEach(input => {
-                formData[input.name] = input.value;
+                if (input.name) {
+                    formData[input.name] = input.value;
+                }
             });
-            // Note: localStorage would be used here, but per instructions, we'll skip actual storage
-            console.log('Draft saved (localStorage not used per restrictions)');
+
+            // Store in memory
+            window.organizationDraft = formData;
+
+            showSaveIndicator();
         }
 
-        function loadDraft() {
-            // Would load from localStorage here
-            console.log('Draft load attempted (localStorage not used per restrictions)');
+        function showSaveIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'save-indicator';
+            indicator.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Draft saved</span>
+            `;
+            document.body.appendChild(indicator);
+
+            setTimeout(() => indicator.classList.add('show'), 10);
+
+            setTimeout(() => {
+                indicator.classList.remove('show');
+                setTimeout(() => indicator.remove(), 300);
+            }, 2000);
         }
 
-        // Save draft every 30 seconds
-        setInterval(saveDraft, 30000);
+        // ===========================
+        // Character Counter for Description
+        // ===========================
+        const descriptionTextarea = document.getElementById('id_description');
+        if (descriptionTextarea) {
+            const maxLength = 1000;
+            const counter = document.createElement('div');
+            counter.className = 'char-counter';
+            descriptionTextarea.parentNode.appendChild(counter);
 
-        // Load draft on page load
-        loadDraft();
+            function updateCounter() {
+                const remaining = maxLength - descriptionTextarea.value.length;
+                counter.textContent = ${descriptionTextarea.value.length} / ${maxLength} characters;
+
+                if (remaining < 100) {
+                    counter.style.color = '#ef4444';
+                } else if (remaining < 200) {
+                    counter.style.color = '#f59e0b';
+                } else {
+                    counter.style.color = '#6b7280';
+                }
+            }
+
+            descriptionTextarea.setAttribute('maxlength', maxLength);
+            descriptionTextarea.addEventListener('input', updateCounter);
+            updateCounter();
+        }
 
         // ===========================
-        // Unsaved Changes Warning
+        // Form Cards Animation on Load
         // ===========================
-        let formModified = false;
+        const formCards = document.querySelectorAll('.form-card');
+        formCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // ===========================
+        // Status Notice Animation
+        // ===========================
+        const statusNotice = document.querySelector('.status-notice');
+        if (statusNotice) {
+            statusNotice.style.opacity = '0';
+            statusNotice.style.transform = 'scale(0.95)';
+
+            setTimeout(() => {
+                statusNotice.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                statusNotice.style.opacity = '1';
+                statusNotice.style.transform = 'scale(1)';
+            }, 600);
+        }
+
+        // ===========================
+        // Confirm Before Leaving with Unsaved Changes
+        // ===========================
+        let formChanged = false;
 
         formInputs.forEach(input => {
             input.addEventListener('change', function() {
-                formModified = true;
+                formChanged = true;
+            });
+        });
+
+        // Also track file inputs
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    formChanged = true;
+                }
             });
         });
 
         window.addEventListener('beforeunload', function(e) {
-            if (formModified && !form.submitted) {
+            if (formChanged && !editForm.submitted) {
                 e.preventDefault();
                 e.returnValue = '';
                 return '';
             }
         });
 
-        // Mark form as submitted when saving
-        if (form) {
-            form.addEventListener('submit', function() {
-                this.submitted = true;
+        if (editForm) {
+            editForm.addEventListener('submit', function() {
+                editForm.submitted = true;
             });
         }
 
         // ===========================
-        // Card Entrance Animations
+        // Input Focus Effects
         // ===========================
-        function animateCardsOnScroll() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach((entry, index) => {
-                    if (entry.isIntersecting) {
-                        setTimeout(() => {
-                            entry.target.style.opacity = '1';
-                            entry.target.style.transform = 'translateY(0)';
-                        }, index * 100);
-                    }
-                });
-            }, { threshold: 0.1 });
-
-            formCards.forEach(card => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                observer.observe(card);
+        const formInputFields = document.querySelectorAll('.form-input, .form-textarea');
+        formInputFields.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
             });
-        }
+
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+                if (this.value.trim()) {
+                    this.parentElement.classList.add('filled');
+                } else {
+                    this.parentElement.classList.remove('filled');
+                }
+            });
+
+            // Initialize filled state
+            if (input.value.trim()) {
+                input.parentElement.classList.add('filled');
+            }
+        });
 
         // ===========================
-        // Focus Areas Tag Input Enhancement
+        // Focus Areas Tag Enhancement
         // ===========================
         const focusAreasInput = document.getElementById('id_focus_areas');
+
         if (focusAreasInput) {
-            // Create visual tags display
-            const tagsDisplay = document.createElement('div');
-            tagsDisplay.className = 'tags-display';
-            tagsDisplay.style.cssText = `
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-                margin-top: 0.75rem;
-                padding: 0.75rem;
-                background: #f9fafb;
-                border-radius: 8px;
-                min-height: 50px;
-            `;
-            focusAreasInput.parentNode.appendChild(tagsDisplay);
+            focusAreasInput.addEventListener('blur', function() {
+                const values = this.value.split(',')
+                    .map(val => val.trim())
+                    .filter(val => val.length > 0);
+                this.value = values.join(', ');
 
-            function updateTagsDisplay() {
-                const value = focusAreasInput.value.trim();
-                const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag);
+                // Show preview tags
+                showFocusAreasPreview(values);
+            });
 
-                tagsDisplay.innerHTML = '';
-                if (tags.length === 0) {
-                    tagsDisplay.innerHTML = '<span style="color: #9ca3af; font-size: 0.875rem;">Tags will appear here...</span>';
-                } else {
-                    tags.forEach(tag => {
-                        const tagElement = document.createElement('span');
-                        tagElement.className = 'preview-tag';
-                        tagElement.textContent = tag;
-                        tagElement.style.cssText = `
-                            display: inline-block;
-                            padding: 0.5rem 1rem;
-                            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-                            color: #667eea;
-                            border: 1px solid rgba(102, 126, 234, 0.3);
-                            border-radius: 20px;
-                            font-size: 0.9rem;
-                            font-weight: 500;
-                            transition: all 0.3s ease;
-                        `;
+            // Initialize preview on load
+            if (focusAreasInput.value.trim()) {
+                const values = focusAreasInput.value.split(',')
+                    .map(val => val.trim())
+                    .filter(val => val.length > 0);
+                showFocusAreasPreview(values);
+            }
+        }
 
-                        tagElement.addEventListener('mouseenter', function() {
-                            this.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                            this.style.color = 'white';
-                            this.style.transform = 'translateY(-2px)';
-                            this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
-                        });
+        function showFocusAreasPreview(areas) {
+            const parentGroup = focusAreasInput.parentElement;
+            let previewContainer = parentGroup.querySelector('.focus-areas-preview');
 
-                        tagElement.addEventListener('mouseleave', function() {
-                            this.style.background = 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)';
-                            this.style.color = '#667eea';
-                            this.style.transform = '';
-                            this.style.boxShadow = '';
-                        });
-
-                        tagsDisplay.appendChild(tagElement);
-                    });
-                }
+            if (!previewContainer) {
+                previewContainer = document.createElement('div');
+                previewContainer.className = 'focus-areas-preview';
+                parentGroup.appendChild(previewContainer);
             }
 
-            focusAreasInput.addEventListener('input', debounce(updateTagsDisplay, 300));
-            updateTagsDisplay();
+            if (areas.length > 0) {
+                previewContainer.innerHTML = areas.map(area =>
+                    <span class="preview-tag">${area}</span>
+                ).join('');
+                previewContainer.style.display = 'flex';
+            } else {
+                previewContainer.style.display = 'none';
+            }
         }
 
         // ===========================
-        // File Input Enhancement
+        // Registration Number Info Tooltip
         // ===========================
-        const verificationDocInput = document.getElementById('id_verification_document');
-        if (verificationDocInput) {
-            verificationDocInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-
-                if (file) {
-                    const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-                    if (!validTypes.includes(file.type)) {
-                        showNotification('Please upload a PDF, DOC, or DOCX file', 'error');
-                        this.value = '';
-                        return;
-                    }
-
-                    const maxSize = 10 * 1024 * 1024; // 10MB
-                    if (file.size > maxSize) {
-                        showNotification('File size must be less than 10MB', 'error');
-                        this.value = '';
-                        return;
-                    }
-
-                    showNotification(`File "${file.name}" selected`, 'success');
-                }
+        const regNumberInput = document.getElementById('id_registration_number');
+        if (regNumberInput) {
+            regNumberInput.addEventListener('click', function() {
+                showTooltip(this, 'Contact support to modify registration number');
             });
         }
 
-        // ===========================
-        // Utility Functions
-        // ===========================
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `notification notification-${type}`;
+        function showTooltip(element, message) {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'inline-tooltip';
+            tooltip.textContent = message;
 
-            const icons = {
-                success: '<path d="M20 6L9 17l-5-5"></path>',
-                error: '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>',
-                info: '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'
-            };
+            element.parentElement.appendChild(tooltip);
 
-            const colors = {
-                success: '#10b981',
-                error: '#ef4444',
-                info: '#667eea'
-            };
-
-            notification.innerHTML = `
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    ${icons[type]}
-                </svg>
-                <span>${message}</span>
-            `;
-
-            notification.style.cssText = `
-                position: fixed;
-                top: 2rem;
-                right: 2rem;
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-                background: white;
-                color: ${colors[type]};
-                padding: 1rem 1.5rem;
-                border-radius: 8px;
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-                border-left: 4px solid ${colors[type]};
-                z-index: 10000;
-                animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s;
-                max-width: 400px;
-                font-weight: 500;
-            `;
-
-            document.body.appendChild(notification);
+            setTimeout(() => tooltip.classList.add('show'), 10);
 
             setTimeout(() => {
-                notification.style.animation = 'slideOutRight 0.3s ease';
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
+                tooltip.classList.remove('show');
+                setTimeout(() => tooltip.remove(), 300);
             }, 3000);
         }
 
-        function scrollToFirstError() {
-            const firstError = document.querySelector('.form-input.error, .form-textarea.error');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstError.focus();
-            }
+        // ===========================
+        // Form Action Buttons
+        // ===========================
+        const saveButton = document.querySelector('.btn-save');
+        const cancelButton = document.querySelector('.btn-cancel');
+
+        if (saveButton) {
+            saveButton.addEventListener('click', function(e) {
+                // Add loading state
+                if (editForm && editForm.checkValidity()) {
+                    this.classList.add('loading');
+                    this.disabled = true;
+
+                    // The form will submit naturally, loading state will show
+                }
+            });
         }
 
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function(e) {
+                // Check if form has changes
+                if (formChanged) {
+                    const confirmLeave = confirm('You have unsaved changes. Are you sure you want to leave?');
+                    if (!confirmLeave) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        }
+
+        // ===========================
+        // Button Ripple Effect
+        // ===========================
+        const buttons = document.querySelectorAll('.btn-save, .btn-cancel, .btn-upload');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                ripple.className = 'button-ripple';
+
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+
+                this.appendChild(ripple);
+
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Add ripple CSS if not exists
+        if (!document.getElementById('button-ripple-style')) {
+            const style = document.createElement('style');
+            style.id = 'button-ripple-style';
+            style.textContent = `
+                .btn-save, .btn-cancel, .btn-upload {
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .button-ripple {
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.6);
+                    transform: scale(0);
+                    animation: ripple-animation 0.6s ease-out;
+                    pointer-events: none;
+                }
+
+                @keyframes ripple-animation {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // ===========================
+        // Success Message Animation
+        // ===========================
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            showSuccessMessage('Organization profile updated successfully!');
+        }
+
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(successDiv);
+
+            setTimeout(() => successDiv.classList.add('show'), 10);
+
+            setTimeout(() => {
+                successDiv.classList.remove('show');
+                setTimeout(() => successDiv.remove(), 300);
+            }, 4000);
         }
 
         // ===========================
@@ -488,283 +574,12 @@
                 }
             }
 
-            // Escape to cancel
-            if (e.key === 'Escape') {
-                const cancelBtn = document.querySelector('.btn-cancel');
-                if (cancelBtn) {
-                    if (formModified) {
-                        if (confirm('You have unsaved changes. Are you sure you want to leave?')) {
-                            window.location.href = cancelBtn.href;
-                        }
-                    } else {
-                        window.location.href = cancelBtn.href;
-                    }
-                }
+            // Escape to cancel/go back
+            if (e.key === 'Escape' && cancelButton) {
+                cancelButton.click();
             }
         });
-
-        // ===========================
-        // Form Field Enhancements
-        // ===========================
-        formInputs.forEach(input => {
-            // Add floating label effect
-            if (input.value) {
-                input.classList.add('has-value');
-            }
-
-            input.addEventListener('input', function() {
-                if (this.value) {
-                    this.classList.add('has-value');
-                } else {
-                    this.classList.remove('has-value');
-                }
-            });
-
-            // Add focus effects
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('focused');
-            });
-
-            input.addEventListener('blur', function() {
-                this.parentElement.classList.remove('focused');
-            });
-        });
-
-        // ===========================
-        // Smooth Scroll to Sections
-        // ===========================
-        function createProgressIndicator() {
-            const sections = document.querySelectorAll('.form-card');
-            if (sections.length <= 1) return;
-
-            const indicator = document.createElement('div');
-            indicator.className = 'form-progress';
-            indicator.style.cssText = `
-                position: fixed;
-                right: 2rem;
-                top: 50%;
-                transform: translateY(-50%);
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-                z-index: 100;
-            `;
-
-            sections.forEach((section, index) => {
-                const dot = document.createElement('button');
-                dot.className = 'progress-dot';
-                dot.style.cssText = `
-                    width: 12px;
-                    height: 12px;
-                    border-radius: 50%;
-                    background: #d1d5db;
-                    border: none;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    padding: 0;
-                `;
-
-                dot.addEventListener('click', () => {
-                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-
-                dot.addEventListener('mouseenter', function() {
-                    this.style.transform = 'scale(1.5)';
-                    this.style.background = '#667eea';
-                });
-
-                dot.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('active')) {
-                        this.style.transform = 'scale(1)';
-                        this.style.background = '#d1d5db';
-                    }
-                });
-
-                indicator.appendChild(dot);
-            });
-
-            document.body.appendChild(indicator);
-
-            // Update active dot on scroll
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const index = Array.from(sections).indexOf(entry.target);
-                        const dots = indicator.querySelectorAll('.progress-dot');
-                        dots.forEach((dot, i) => {
-                            if (i === index) {
-                                dot.classList.add('active');
-                                dot.style.background = '#667eea';
-                                dot.style.transform = 'scale(1.5)';
-                            } else {
-                                dot.classList.remove('active');
-                                dot.style.background = '#d1d5db';
-                                dot.style.transform = 'scale(1)';
-                            }
-                        });
-                    }
-                });
-            }, { threshold: 0.5 });
-
-            sections.forEach(section => observer.observe(section));
-        }
-
-        // ===========================
-        // Initialize All Features
-        // ===========================
-        animateCardsOnScroll();
-        createProgressIndicator();
-
-        // ===========================
-        // Console Message
-        // ===========================
-        console.log('%c✏️ Edit NGO Profile Loaded', 'color: #667eea; font-size: 16px; font-weight: bold;');
-        console.log('%cKeyboard Shortcuts:', 'color: #6b7280; font-size: 12px;');
-        console.log('%c  Ctrl/Cmd + S: Save', 'color: #6b7280; font-size: 11px;');
-        console.log('%c  Escape: Cancel', 'color: #6b7280; font-size: 11px;');
 
     });
 
 })();
-
-// ===========================
-// Additional CSS Animations
-// ===========================
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes zoomIn {
-        from {
-            transform: scale(0.8);
-            opacity: 0;
-        }
-        to {
-            transform: scale(1);
-            opacity: 1;
-        }
-    }
-
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-
-    .form-group.focused label {
-        color: #667eea;
-        transform: translateY(-2px);
-        transition: all 0.3s ease;
-    }
-
-    .notification {
-        pointer-events: auto;
-    }
-
-    .notification:hover {
-        transform: translateX(-5px);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-    }
-
-    @media (max-width: 768px) {
-        .form-progress {
-            display: none;
-        }
-
-        .notification {
-            right: 1rem;
-            left: 1rem;
-            max-width: none;
-        }
-    }
-
-    /* Smooth focus ring */
-    .form-input:focus,
-    .form-textarea:focus {
-        animation: focusPulse 0.3s ease;
-    }
-
-    @keyframes focusPulse {
-        0% {
-            box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
-        }
-        100% {
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-    }
-
-    /* Loading animation for save button */
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    /* Character counter animation */
-    .character-counter {
-        animation: fadeIn 0.3s ease;
-    }
-
-    /* Preview tag animations */
-    .preview-tag {
-        animation: tagPop 0.3s ease;
-    }
-
-    @keyframes tagPop {
-        0% {
-            transform: scale(0);
-            opacity: 0;
-        }
-        50% {
-            transform: scale(1.1);
-        }
-        100% {
-            transform: scale(1);
-            opacity: 1;
-        }
-    }
-
-    /* Form card hover shadow enhancement */
-    .form-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Progress indicator on mobile */
-    @media (max-width: 1024px) {
-        .form-progress {
-            right: 1rem;
-        }
-    }
-
-    /* Accessibility improvements */
-    .form-input:focus-visible,
-    .form-textarea:focus-visible,
-    button:focus-visible {
-        outline: 2px solid #667eea;
-        outline-offset: 2px;
-    }
-
-    /* Reduced motion support */
-    @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-        }
-    }
-`;
-document.head.appendChild(style);
