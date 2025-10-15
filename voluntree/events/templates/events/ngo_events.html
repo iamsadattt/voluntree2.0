@@ -2,7 +2,9 @@
 {% load static %}
 
 {% block title %}My Events - Voluntree{% endblock %}
-
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/my_events.css' %}">
+{% endblock %}
 {% block content %}
 <div class="ngo-events-page">
     <div class="events-container">
@@ -91,4 +93,9 @@
 
     </div>
 </div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{% static 'js/my_events.js' %}"></script>
 {% endblock %}

@@ -21,6 +21,9 @@
                 <span class="logo-text">Voluntree Admin</span>
             </div>
 
+
+
+
             <ul class="admin-nav-links">
                 <li><a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">Dashboard</a></li>
                 <li><a href="{% url 'admin_ngo_approvals' %}" class="{% if request.resolver_match.url_name == 'admin_ngo_approvals' %}active{% endif %}">NGO Approvals</a></li>
