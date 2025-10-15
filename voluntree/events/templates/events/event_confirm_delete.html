@@ -3,6 +3,10 @@
 
 {% block title %}Delete Event - Voluntree{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/events/event_confirm_delete.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="delete-confirm-page">
     <div class="container">
@@ -36,4 +40,8 @@
 
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/events/event_confirm_delete.js' %}"></script>
 {% endblock %}
