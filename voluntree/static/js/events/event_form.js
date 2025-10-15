@@ -14,7 +14,7 @@
         const dateInput = document.querySelector('input[name="date"]');
         const maxVolunteersInput = document.querySelector('input[name="max_volunteers"]');
         const requiredSkillsInput = document.querySelector('input[name="required_skills"], textarea[name="required_skills"]');
-        const allInputs = document.querySelectorAll('input, textarea, select');
+        const allInputs = document.querySelectorAll('input:not([type="hidden"]), textarea, select');
 
         // ===========================
         // Image Preview Functionality
@@ -278,27 +278,32 @@
         }
 
         // ===========================
-        // Form Submission
+        // Form Submission - FIXED VERSION
         // ===========================
         if (form) {
             form.addEventListener('submit', function(e) {
+                // Validate form
                 if (!validateForm()) {
                     e.preventDefault();
-                    return;
+                    return false;
                 }
 
-                // Show loading state
+                // Validation passed - show loading state but let form submit
                 if (submitButton) {
                     submitButton.classList.add('loading');
                     submitButton.disabled = true;
+                    const originalText = submitButton.textContent;
+                    submitButton.textContent = 'Submitting...';
                 }
 
-                // Disable all inputs
-                allInputs.forEach(input => {
-                    input.disabled = true;
-                });
-
                 showNotification('Submitting event...', 'info');
+
+                // Mark form as submitted to avoid unsaved changes warning
+                formModified = false;
+
+                // DON'T disable inputs - they need to be active for form submission
+                // DON'T prevent default - let the form submit naturally
+                // Form will submit after this event handler completes
             });
         }
 
@@ -320,12 +325,6 @@
                 return '';
             }
         });
-
-        if (form) {
-            form.addEventListener('submit', function() {
-                this.submitted = true;
-            });
-        }
 
         // ===========================
         // Auto-grow Textarea
@@ -424,7 +423,7 @@
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 if (submitButton && !submitButton.disabled) {
-                    submitButton.click();
+                    form.submit();
                 }
             }
 
@@ -590,10 +589,6 @@
         // Form Progress Indicator
         // ===========================
         function createProgressBar() {
-            const formGroups = document.querySelectorAll('.form-group');
-            const totalFields = formGroups.length;
-            let filledFields = 0;
-
             const progressBar = document.createElement('div');
             progressBar.className = 'form-progress-bar';
             progressBar.style.cssText = `
@@ -609,7 +604,7 @@
             document.body.appendChild(progressBar);
 
             function updateProgress() {
-                filledFields = 0;
+                let filledFields = 0;
                 allInputs.forEach(input => {
                     if (input.value && input.value.trim() !== '') {
                         filledFields++;
@@ -722,17 +717,14 @@ style.textContent = `
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
     }
 
-    /* Certificate section transition */
     .certificate-section {
         transition: all 0.3s ease;
     }
 
-    /* File info animation */
     .file-info {
         animation: slideIn 0.3s ease;
     }
 
-    /* Skills tags animation */
     .skills-tags-display span {
         animation: tagPop 0.3s ease;
     }
@@ -751,7 +743,6 @@ style.textContent = `
         }
     }
 
-    /* Responsive notification */
     @media (max-width: 768px) {
         .notification {
             right: 1rem;
@@ -760,7 +751,6 @@ style.textContent = `
         }
     }
 
-    /* Accessibility */
     .form-group input:focus-visible,
     .form-group textarea:focus-visible,
     .form-group select:focus-visible {
@@ -768,7 +758,6 @@ style.textContent = `
         outline-offset: 2px;
     }
 
-    /* Reduced motion support */
     @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -779,7 +768,6 @@ style.textContent = `
         }
     }
 
-    /* Form progress bar enhancement */
     .form-progress-bar {
         box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
     }
