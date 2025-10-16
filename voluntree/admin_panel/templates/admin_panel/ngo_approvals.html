@@ -90,7 +90,7 @@
             </div>
 
             <div class="ngo-card-actions">
-                <a href="{% url 'admin_ngo_detail' ngo.id %}" class="btn-action btn-info">View Details</a>
+                <a href="{% url 'view_ngo_profile' ngo.id %}" class="btn-action btn-info">View Details</a>
                 
                 {% if ngo.status == 'pending' %}
                     <form method="post" action="{% url 'admin_approve_ngo' ngo.id %}" style="display: inline;">

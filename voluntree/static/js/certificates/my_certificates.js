@@ -424,46 +424,25 @@
         }, 100));
 
         // ===========================
-        // View Certificate in Modal
+        // View Certificate Button (PDF Preview)
         // ===========================
         function addViewButtons() {
             const cards = document.querySelectorAll('.certificate-card');
             cards.forEach(card => {
                 const header = card.querySelector('.certificate-header');
                 const viewBtn = document.createElement('button');
+                viewBtn.className = 'view-certificate-btn';
                 viewBtn.innerHTML = '👁️';
-                viewBtn.title = 'Quick view';
-                viewBtn.style.cssText = `
-                    position: absolute;
-                    top: 1rem;
-                    right: 1rem;
-                    width: 40px;
-                    height: 40px;
-                    background: rgba(255, 255, 255, 0.2);
-                    backdrop-filter: blur(10px);
-                    border: 2px solid rgba(255, 255, 255, 0.3);
-                    border-radius: 8px;
-                    font-size: 1.25rem;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    z-index: 10;
-                `;
-
-                viewBtn.addEventListener('mouseenter', function() {
-                    this.style.background = 'rgba(255, 255, 255, 0.3)';
-                    this.style.transform = 'scale(1.1)';
-                });
-
-                viewBtn.addEventListener('mouseleave', function() {
-                    this.style.background = 'rgba(255, 255, 255, 0.2)';
-                    this.style.transform = 'scale(1)';
-                });
+                viewBtn.title = 'Preview certificate';
+                viewBtn.setAttribute('aria-label', 'Preview certificate');
 
                 viewBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const downloadUrl = card.querySelector('.download-btn')?.href;
-                    if (downloadUrl) {
-                        openCertificateModal(downloadUrl);
+                    const downloadLink = card.querySelector('.download-btn');
+                    if (downloadLink) {
+                        const pdfUrl = downloadLink.getAttribute('href');
+                        const eventName = card.querySelector('.certificate-title h3')?.textContent || 'Certificate';
+                        openPDFModal(pdfUrl, eventName, downloadLink);
                     }
                 });
 
@@ -471,55 +450,183 @@
             });
         }
 
-        function openCertificateModal(url) {
+        // ===========================
+        // PDF Preview Modal
+        // ===========================
+        function openPDFModal(pdfUrl, eventName, downloadLink) {
+            // Create modal overlay
             const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.9);
-                z-index: 10000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 2rem;
-                animation: fadeIn 0.3s ease;
-            `;
+            modal.className = 'pdf-modal-overlay';
+
+            // Try multiple PDF display methods for better compatibility
+            const viewerContent = getPDFViewerHTML(pdfUrl);
 
             modal.innerHTML = `
-                <div style="position: relative; max-width: 90%; max-height: 90%; background: white; border-radius: 12px; overflow: hidden;">
-                    <button id="closeModal" style="position: absolute; top: 1rem; right: 1rem; width: 40px; height: 40px; background: #ef4444; color: white; border: none; border-radius: 8px; font-size: 1.5rem; cursor: pointer; z-index: 1;">×</button>
-                    <iframe src="${url}" style="width: 100%; height: 80vh; border: none;"></iframe>
+                <div class="pdf-modal-content">
+                    <div class="pdf-modal-header">
+                        <h3>📜 ${eventName}</h3>
+                        <div class="pdf-modal-actions">
+                            <a href="${pdfUrl}" class="pdf-modal-btn pdf-download-btn" download target="_blank">
+                                📥 Download
+                            </a>
+                            <button class="pdf-modal-btn pdf-close-btn" id="closePDFModal" aria-label="Close preview">
+                                ×
+                            </button>
+                        </div>
+                    </div>
+                    ${viewerContent}
                 </div>
             `;
 
             document.body.appendChild(modal);
             document.body.style.overflow = 'hidden';
 
-            const closeBtn = modal.querySelector('#closeModal');
+            // Close button handler
+            const closeBtn = modal.querySelector('#closePDFModal');
             closeBtn.addEventListener('click', function() {
-                modal.remove();
-                document.body.style.overflow = '';
+                closePDFModal(modal);
             });
 
+            // Click outside to close
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
-                    modal.remove();
-                    document.body.style.overflow = '';
+                    closePDFModal(modal);
                 }
             });
 
             // ESC key to close
             const handleEscape = function(e) {
                 if (e.key === 'Escape') {
-                    modal.remove();
-                    document.body.style.overflow = '';
+                    closePDFModal(modal);
                     document.removeEventListener('keydown', handleEscape);
                 }
             };
             document.addEventListener('keydown', handleEscape);
+
+            // Download button handler
+            const downloadBtn = modal.querySelector('.pdf-download-btn');
+            downloadBtn.addEventListener('click', function() {
+                showNotification('Certificate download started', 'success');
+            });
+
+            // Check if iframe loaded successfully
+            const iframe = modal.querySelector('iframe');
+            if (iframe) {
+                iframe.addEventListener('error', function() {
+                    console.error('PDF iframe failed to load');
+                    handlePDFLoadError(modal, pdfUrl, eventName);
+                });
+
+                // Fallback if iframe doesn't load after 3 seconds
+                setTimeout(function() {
+                    // Check if iframe content is accessible
+                    try {
+                        if (!iframe.contentWindow || iframe.contentWindow.location.href === 'about:blank') {
+                            handlePDFLoadError(modal, pdfUrl, eventName);
+                        }
+                    } catch (e) {
+                        // Cross-origin, but that's okay - PDF should still load
+                    }
+                }, 3000);
+            }
+        }
+
+        function getPDFViewerHTML(pdfUrl) {
+            // Try using Google Docs Viewer as fallback
+            const useGoogleViewer = false; // Set to true if direct embedding fails
+
+            if (useGoogleViewer) {
+                return `
+                    <iframe class="pdf-viewer" 
+                        src="https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true" 
+                        title="Certificate Preview"
+                        allow="fullscreen">
+                    </iframe>
+                `;
+            } else {
+                // Direct PDF embedding with multiple fallback options
+                return `
+                    <object class="pdf-viewer" 
+                        data="${pdfUrl}#toolbar=1&navpanes=0&scrollbar=1&view=FitH" 
+                        type="application/pdf"
+                        title="Certificate Preview">
+                        <iframe class="pdf-viewer" 
+                            src="${pdfUrl}#toolbar=1&navpanes=0&scrollbar=1" 
+                            title="Certificate Preview">
+                            <div style="padding: 3rem; text-align: center;">
+                                <div style="font-size: 4rem; margin-bottom: 1rem;">📄</div>
+                                <h3 style="color: #1f2937; margin-bottom: 1rem;">PDF Preview Not Available</h3>
+                                <p style="color: #6b7280; margin-bottom: 2rem;">Your browser doesn't support PDF preview. Please download the certificate to view it.</p>
+                                <a href="${pdfUrl}" class="pdf-modal-btn pdf-download-btn" download style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; font-weight: 600; text-decoration: none;">
+                                    📥 Download Certificate
+                                </a>
+                            </div>
+                        </iframe>
+                    </object>
+                `;
+            }
+        }
+
+        function handlePDFLoadError(modal, pdfUrl, eventName) {
+            const viewer = modal.querySelector('.pdf-viewer');
+            if (!viewer) return;
+
+            const parent = viewer.parentElement;
+            const errorMessage = document.createElement('div');
+            errorMessage.style.cssText = `
+                padding: 3rem;
+                text-align: center;
+                background: #f9fafb;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            `;
+
+            errorMessage.innerHTML = `
+                <div style="font-size: 5rem; margin-bottom: 1.5rem;">📄</div>
+                <h3 style="color: #1f2937; margin-bottom: 1rem; font-size: 1.5rem;">Unable to Preview PDF</h3>
+                <p style="color: #6b7280; margin-bottom: 2rem; max-width: 500px;">
+                    Your browser settings may be blocking the PDF preview. 
+                    You can still download the certificate or open it in a new tab.
+                </p>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+                    <a href="${pdfUrl}" target="_blank" class="pdf-modal-btn" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; font-weight: 600; text-decoration: none; border: none;">
+                        🔗 Open in New Tab
+                    </a>
+                    <a href="${pdfUrl}" download class="pdf-modal-btn" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600; text-decoration: none;">
+                        📥 Download
+                    </a>
+                </div>
+            `;
+
+            viewer.replaceWith(errorMessage);
+        }
+
+        function closePDFModal(modal) {
+            modal.style.animation = 'modalFadeOut 0.3s ease';
+            setTimeout(() => {
+                modal.remove();
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        // Add modal fade out animation
+        if (!document.getElementById('modal-animations')) {
+            const style = document.createElement('style');
+            style.id = 'modal-animations';
+            style.textContent = `
+                @keyframes modalFadeOut {
+                    from {
+                        opacity: 1;
+                    }
+                    to {
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
         }
 
         // ===========================
@@ -642,60 +749,6 @@
                 window.print();
             }
         });
-
-        // ===========================
-        // Print All Button
-        // ===========================
-        function addPrintButton() {
-            const pageHeader = document.querySelector('.page-header');
-            if (!pageHeader || !document.querySelector('.certificates-grid')) return;
-
-            const printBtn = document.createElement('button');
-            printBtn.innerHTML = `
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                    <rect x="6" y="14" width="12" height="8"></rect>
-                </svg>
-                Print All
-            `;
-            printBtn.style.cssText = `
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.875rem 1.75rem;
-                background: white;
-                color: #667eea;
-                border: 2px solid #667eea;
-                border-radius: 8px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                margin-top: 1rem;
-            `;
-
-            printBtn.addEventListener('mouseenter', function() {
-                this.style.background = '#667eea';
-                this.style.color = 'white';
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
-            });
-
-            printBtn.addEventListener('mouseleave', function() {
-                this.style.background = 'white';
-                this.style.color = '#667eea';
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = 'none';
-            });
-
-            printBtn.addEventListener('click', function() {
-                window.print();
-            });
-
-            pageHeader.appendChild(printBtn);
-        }
-
-        addPrintButton();
 
         // ===========================
         // Console Log for Debug

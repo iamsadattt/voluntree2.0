@@ -1,3 +1,5 @@
+#accounts/views.py
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -196,3 +198,14 @@ def view_volunteer_profile(request, user_id):
         'interests_list': [i.strip() for i in profile.interests.split(',') if i.strip()] if profile.interests else [],
     }
     return render(request, 'accounts/volunteer_profile.html', context)
+
+
+def view_ngo_profile(request, ngo_id):
+    """Public view of an NGO's profile"""
+    ngo = get_object_or_404(NGO, id=ngo_id)
+
+    context = {
+        'profile': ngo,
+        'focus_areas_list': [a.strip() for a in ngo.focus_areas.split(',') if a.strip()] if ngo.focus_areas else [],
+    }
+    return render(request, 'accounts/ngo_profile.html', context)

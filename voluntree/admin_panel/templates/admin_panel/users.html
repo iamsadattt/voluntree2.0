@@ -62,8 +62,8 @@
                     <td class="text-center">{{ volunteer.volunteer_profile.hours_completed }}</td>
                     <td>{{ volunteer.date_joined|date:"M d, Y" }}</td>
                     <td class="actions-cell">
-                        <a href="{% url 'admin_user_detail' volunteer.id %}" class="btn-action-small btn-info" title="View Details">👁️</a>
-                        <a href="{% url 'admin_user_edit' volunteer.id %}" class="btn-action-small btn-warning" title="Edit">✏️</a>
+                        <a href="{% url 'view_volunteer_profile' volunteer.id %}" class="btn-action-small btn-info" title="View Details">👁️</a>
+                        <!-- <a href="{% url 'admin_user_edit' volunteer.id %}" class="btn-action-small btn-warning" title="Edit">✏️</a> -->
                         <form method="post" action="{% url 'admin_user_delete' volunteer.id %}" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn-action-small btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete {{ volunteer.username }}? This action cannot be undone.')">🗑️</button>
