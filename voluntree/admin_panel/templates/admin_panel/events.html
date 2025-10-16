@@ -1,6 +1,10 @@
 {% extends 'admin_panel/base_admin.html' %}
-
+{% load static %}
 {% block title %}Events Management - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_panel/events.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -79,8 +83,8 @@
                     </td>
                     <td>{{ event.created_at|date:"M d, Y" }}</td>
                     <td class="actions-cell">
-                        <a href="{% url 'admin_event_detail' event.id %}" class="btn-action-small btn-info" title="View Details">👁️</a>
-                        <a href="{% url 'admin_event_edit' event.id %}" class="btn-action-small btn-warning" title="Edit">✏️</a>
+                        <a href="{% url 'event_detail' event.id %}" class="btn-action-small btn-info" title="View Details">👁️</a>
+<!--                    <a href="{% url 'admin_event_edit' event.id %}" class="btn-action-small btn-warning" title="Edit">✏️</a>   -->
                         <form method="post" action="{% url 'admin_event_delete' event.id %}" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn-action-small btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete {{ event.title }}?')">🗑️</button>
@@ -121,4 +125,8 @@
     {% endif %}
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin_panel/events.js' %}"></script>
 {% endblock %}

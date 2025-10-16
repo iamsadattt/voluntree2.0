@@ -1,6 +1,10 @@
 {% extends 'admin_panel/base_admin.html' %}
-
+{% load static %}
 {% block title %}NGOs Management - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_panel/ngos.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -100,4 +104,8 @@
     {% endif %}
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin_panel/ngos.js' %}"></script>
 {% endblock %}

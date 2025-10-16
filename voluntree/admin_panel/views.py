@@ -275,7 +275,7 @@ def event_detail(request, event_id):
         'event': event,
         'registrations': registrations,
     }
-    return render(request, 'admin_panel/event_detail.html', context)
+    return render(request, 'admin_panel/admin_event_detail.html', context)
 
 
 @login_required

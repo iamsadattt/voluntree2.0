@@ -1,6 +1,10 @@
 {% extends 'admin_panel/base_admin.html' %}
-
+{% load static %}
 {% block title %}Platform Settings - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_panel/settings.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -243,4 +247,8 @@
         <button type="reset" class="btn-reset">↺ Reset</button>
     </div>
 </form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin_panel/settings.js' %}"></script>
 {% endblock %}

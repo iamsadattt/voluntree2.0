@@ -1,6 +1,10 @@
 {% extends 'admin_panel/base_admin.html' %}
-
+{% load static %}
 {% block title %}{{ event.title }} - Event Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_panel/admin_event_detail.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="detail-page">
@@ -209,4 +213,8 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin_panel/admin_event_detail.js' %}"></script>
 {% endblock %}
