@@ -11,6 +11,7 @@ from events.models import Event, EventRegistration
 from .models import PlatformSettings
 from certificates.models import Certificate
 from django.utils import timezone
+from certificates.models import Certificate, CertificateAssignment
 
 
 
@@ -271,12 +272,17 @@ def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     registrations = event.registrations.all()
 
+    # Split comma-separated skills
+    skills_list = []
+    if event.required_skills:
+        skills_list = [skill.strip() for skill in event.required_skills.split(',') if skill.strip()]
+
     context = {
         'event': event,
         'registrations': registrations,
+        'skills_list': skills_list,  # Add this
     }
     return render(request, 'admin_panel/admin_event_detail.html', context)
-
 
 @login_required
 @user_passes_test(is_admin)
@@ -412,3 +418,112 @@ def reject_certificate(request, event_id):
             messages.error(request, 'This event does not have a certificate.')
 
     return redirect('admin_event_detail', event_id=event_id)
+
+
+
+
+# Add these views to admin_panel/views.py
+
+@login_required
+@user_passes_test(is_admin)
+def certificate_approvals(request):
+    """Certificate approval management"""
+
+    status_filter = request.GET.get('status', 'pending')
+    search_query = request.GET.get('search', '')
+    sort_by = request.GET.get('sort', 'newest')
+
+    # Base queryset
+    certificates = Certificate.objects.select_related(
+        'event',
+        'event__ngo',
+        'event__ngo__user'
+    )
+
+    # Apply status filter
+    if status_filter == 'all':
+        pass  # Show all
+    else:
+        certificates = certificates.filter(status=status_filter)
+
+    # Apply search filter
+    if search_query:
+        certificates = certificates.filter(
+            Q(event__title__icontains=search_query) |
+            Q(event__ngo__organization_name__icontains=search_query)
+        )
+
+    # Apply sorting
+    if sort_by == 'oldest':
+        certificates = certificates.order_by('uploaded_at')
+    else:  # newest
+        certificates = certificates.order_by('-uploaded_at')
+
+    # Get counts for filter tabs
+    pending_count = Certificate.objects.filter(status='pending').count()
+    approved_count = Certificate.objects.filter(status='approved').count()
+    rejected_count = Certificate.objects.filter(status='rejected').count()
+    total_count = Certificate.objects.count()
+
+    context = {
+        'certificates': certificates,
+        'status_filter': status_filter,
+        'search_query': search_query,
+        'sort_by': sort_by,
+        'pending_count': pending_count,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
+        'total_count': total_count,
+    }
+
+    return render(request, 'admin_panel/certificate_approvals.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def approve_certificate_action(request, certificate_id):
+    """Approve a certificate"""
+    if request.method == 'POST':
+        certificate = get_object_or_404(Certificate, id=certificate_id)
+        certificate.status = 'approved'
+        certificate.approved_at = timezone.now()
+        certificate.rejected_at = None
+        certificate.save()
+        messages.success(request, f'Certificate for "{certificate.event.title}" has been approved!')
+    return redirect('admin_certificate_approvals')
+
+
+@login_required
+@user_passes_test(is_admin)
+def reject_certificate_action(request, certificate_id):
+    """Reject and delete a certificate"""
+    if request.method == 'POST':
+        certificate = get_object_or_404(Certificate, id=certificate_id)
+        event_title = certificate.event.title
+        certificate.delete()  # Delete the certificate
+        messages.warning(request,
+                         f'Certificate for "{event_title}" has been rejected and deleted. NGO must upload a new one.')
+    return redirect('admin_certificate_approvals')
+
+
+@login_required
+@user_passes_test(is_admin)
+def certificate_detail(request, certificate_id):
+    """View certificate details"""
+    certificate = get_object_or_404(
+        Certificate.objects.select_related('event', 'event__ngo'),
+        id=certificate_id
+    )
+
+    # Get assignments for this certificate
+    assignments = CertificateAssignment.objects.filter(
+        certificate=certificate
+    ).select_related('volunteer', 'volunteer__volunteer_profile')
+
+    context = {
+        'certificate': certificate,
+        'assignments': assignments,
+        'assignments_count': assignments.count(),
+    }
+
+    return render(request, 'admin_panel/certificate_detail.html', context)

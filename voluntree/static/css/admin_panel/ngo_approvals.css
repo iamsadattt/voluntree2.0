@@ -410,6 +410,16 @@
 .no-data-icon {
     font-size: 4rem;
     margin-bottom: 1rem;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .no-data-message h3 {

@@ -31,6 +31,7 @@
                 <li><a href="{% url 'admin_ngos' %}" class="{% if request.resolver_match.url_name == 'admin_ngos' %}active{% endif %}">NGOs</a></li>
                 <li><a href="{% url 'admin_events' %}" class="{% if request.resolver_match.url_name == 'admin_events' %}active{% endif %}">Events</a></li>
                 <li><a href="{% url 'admin_ngo_approvals' %}" class="{% if request.resolver_match.url_name == 'admin_ngo_approvals' %}active{% endif %}">NGO Approvals</a></li>
+                <li><a href="{% url 'admin_certificate_approvals' %}" class="{% if request.resolver_match.url_name == 'admin_certificate_approvals' %}active{% endif %}">Certificates</a></li>
                 <li><a href="{% url 'admin_settings' %}" class="{% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">Settings</a></li>
             </ul>
 

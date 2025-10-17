@@ -1,3 +1,5 @@
+<!-- admin_panel/templates/admin_panel/admin_event_detail.html -->
+
 {% extends 'admin_panel/base_admin.html' %}
 {% load static %}
 {% block title %}{{ event.title }} - Event Details{% endblock %}
@@ -66,16 +68,16 @@
     </div>
 
     <!-- Required Skills -->
-    {% if event.required_skills %}
-    <div class="detail-card">
-        <h2 class="card-title">Required Skills</h2>
-        <div class="tags-container">
-            {% for skill in event.required_skills.split ',' %}
-            <span class="tag">{{ skill|trim }}</span>
-            {% endfor %}
-        </div>
+{% if skills_list %}
+<div class="detail-card">
+    <h2 class="card-title">Required Skills</h2>
+    <div class="tags-container">
+        {% for skill in skills_list %}
+        <span class="tag">{{ skill }}</span>
+        {% endfor %}
     </div>
-    {% endif %}
+</div>
+{% endif %}
 
     <!-- CERTIFICATE SECTION -->
     <div class="detail-card certificate-card">

@@ -31,6 +31,12 @@ urlpatterns = [
     path('event/<int:event_id>/delete/', views.event_delete, name='admin_event_delete'),
 
     # Certificate Approval (NEW)
+    path('certificates/', views.certificate_approvals, name='admin_certificate_approvals'),
+    path('certificate/<int:certificate_id>/approve/', views.approve_certificate_action, name='admin_approve_certificate_action'),
+    path('certificate/<int:certificate_id>/reject/', views.reject_certificate_action, name='admin_reject_certificate_action'),
+    path('certificate/<int:certificate_id>/detail/', views.certificate_detail, name='admin_certificate_detail'),
+
+    # OLD Certificate Approval (keeping for backward compatibility with event detail page)
     path('event/<int:event_id>/certificate/approve/', views.approve_certificate, name='admin_approve_certificate'),
     path('event/<int:event_id>/certificate/reject/', views.reject_certificate, name='admin_reject_certificate'),
 

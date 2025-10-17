@@ -535,6 +535,21 @@
         formatDates();
 
         // ===========================
+        // No Data Icon Animation Enhancement
+        // ===========================
+        const noDataMessage = document.querySelector('.no-data-message');
+        if (noDataMessage) {
+            noDataMessage.style.opacity = '0';
+            noDataMessage.style.transform = 'scale(0.9)';
+
+            setTimeout(() => {
+                noDataMessage.style.transition = 'all 0.6s ease';
+                noDataMessage.style.opacity = '1';
+                noDataMessage.style.transform = 'scale(1)';
+            }, 300);
+        }
+
+        // ===========================
         // Console Log for Debug
         // ===========================
         console.log('✅ NGO Approvals Admin Panel initialized');
