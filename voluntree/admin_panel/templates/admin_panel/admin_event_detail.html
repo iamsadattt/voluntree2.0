@@ -187,9 +187,8 @@
                     {% for registration in registrations %}
                     <tr>
                         <td>
-                            <a href="{% url 'admin_user_detail' registration.volunteer.id %}">
-                                {{ registration.volunteer.get_full_name|default:registration.volunteer.username }}
-                            </a>
+                            <a href="{% url 'view_volunteer_profile' registration.volunteer.id %}">
+                                {{ registration.volunteer.get_full_name|default:registration.volunteer.username }}</a>
                         </td>
                         <td>{{ registration.volunteer.email }}</td>
                         <td>{{ registration.volunteer.volunteer_profile.phone|default:"N/A" }}</td>
