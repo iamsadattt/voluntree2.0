@@ -62,8 +62,8 @@
                     <td><span class="status-badge status-{{ ngo.status }}">{{ ngo.get_status_display }}</span></td>
                     <td class="text-center">{{ ngo.events.count }}</td>
                     <td class="actions-cell">
-                        <a href="{% url 'admin_ngo_detail' ngo.id %}" class="btn-action-small btn-info" title="View Details">👁️</a>
-                        <a href="{% url 'admin_ngo_edit' ngo.id %}" class="btn-action-small btn-warning" title="Edit">✏️</a>
+                        <a href="{% url 'view_ngo_profile' ngo.id %}" class="btn-action-small btn-info" title="View Details">👁️</a>
+                       <!-- <a href="{% url 'admin_ngo_edit' ngo.id %}" class="btn-action-small btn-warning" title="Edit">✏️</a> -->
                         <form method="post" action="{% url 'admin_ngo_delete' ngo.id %}" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn-action-small btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete {{ ngo.organization_name }}? This will also delete all their events.')">🗑️</button>
