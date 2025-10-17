@@ -87,7 +87,12 @@
                                 </span>
                             </div>
 
-                            <a href="{% url 'event_detail' event.pk %}" class="btn-view-event">View Details</a>
+                            <div class="event-actions">
+                                <a href="{% url 'event_detail' event.pk %}" class="btn-view-event">View Details</a>
+                                <a href="{% url 'view_ngo_profile' event.ngo.id %}" class="btn-view-ngo">View NGO
+                                    Profile</a>
+                            </div>
+
                         </div>
                     </div>
                 {% endfor %}

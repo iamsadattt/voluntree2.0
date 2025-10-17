@@ -594,3 +594,47 @@ select:focus-visible {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* View NGO Profile Button */
+.event-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: auto;
+}
+
+.btn-view-ngo {
+    display: block;
+    text-align: center;
+    background: white;
+    color: #667eea;
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid #667eea;
+}
+
+.btn-view-ngo:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.btn-view-ngo:active {
+    transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .event-actions {
+        gap: 0.5rem;
+    }
+
+    .btn-view-ngo {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+    }
+}

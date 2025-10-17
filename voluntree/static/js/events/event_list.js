@@ -14,6 +14,7 @@
         const viewButtons = document.querySelectorAll('.btn-view-event');
         const eventImages = document.querySelectorAll('.event-image');
         const statusBadges = document.querySelectorAll('.event-status');
+        const viewNgoButtons = document.querySelectorAll('.btn-view-ngo');
 
         // ===========================
         // Search Enhancement
@@ -123,6 +124,31 @@
                 }, 150);
             });
         });
+
+
+        // ===========================
+// View NGO Button Enhancement
+// ===========================
+viewNgoButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+        createRipple(e, this);
+
+        // Add click animation
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            this.style.transform = '';
+        }, 150);
+
+        // Optional: Show loading notification
+        showNotification('Loading NGO profile...', 'info');
+    });
+
+
+    button.addEventListener('mouseleave', function() {
+        this.textContent = 'View NGO Profile';
+    });
+});
+
 
         // ===========================
         // Status Badge Tooltips
