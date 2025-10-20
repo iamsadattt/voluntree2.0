@@ -1,4 +1,4 @@
-#accounts/views.py
+# accounts/views.py
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
@@ -11,17 +11,31 @@ from django.shortcuts import get_object_or_404
 
 def register_choice(request):
     """Landing page to choose registration type"""
+    # If user is already logged in, redirect to events page
+    if request.user.is_authenticated:
+        if request.user.user_type == 'admin':
+            return redirect('admin_dashboard')
+        else:
+            return redirect('event_list')
+
     return render(request, 'accounts/register.html')
 
 
 def register_volunteer(request):
+    # If user is already logged in, redirect to events page
+    if request.user.is_authenticated:
+        if request.user.user_type == 'admin':
+            return redirect('admin_dashboard')
+        else:
+            return redirect('event_list')
+
     if request.method == 'POST':
         form = VolunteerRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             messages.success(request, 'Registration successful! Welcome to Voluntree.')
-            return redirect('landing')
+            return redirect('event_list')  # Changed to event_list
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -31,13 +45,20 @@ def register_volunteer(request):
 
 
 def register_ngo(request):
+    # If user is already logged in, redirect to events page
+    if request.user.is_authenticated:
+        if request.user.user_type == 'admin':
+            return redirect('admin_dashboard')
+        else:
+            return redirect('event_list')
+
     if request.method == 'POST':
         form = NGORegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             messages.success(request, 'Registration successful! Your NGO account is pending approval.')
-            return redirect('landing')
+            return redirect('event_list')  # Changed to event_list
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -47,6 +68,13 @@ def register_ngo(request):
 
 
 def user_login(request):
+    # If user is already logged in, redirect to events page
+    if request.user.is_authenticated:
+        if request.user.user_type == 'admin':
+            return redirect('admin_dashboard')
+        else:
+            return redirect('event_list')
+
     if request.method == 'POST':
         form = CustomLoginForm(request, data=request.POST)
         if form.is_valid():
@@ -61,7 +89,7 @@ def user_login(request):
                 if user.user_type == 'admin':
                     return redirect('admin_dashboard')
                 else:
-                    return redirect('landing')
+                    return redirect('event_list')  # NGO and Volunteer go to events page
         else:
             messages.error(request, 'Invalid username or password.')
     else:
@@ -73,7 +101,7 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
-    return redirect('landing')
+    return redirect('login')  # Changed from 'landing' to 'login'
 
 
 @login_required
